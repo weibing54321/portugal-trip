@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portugal · 26 Sept – 4 Oct 2026</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Karla:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4F1E8;
+  --paper-2:#FBF9F3;
+  --ink:#1C2B3A;
+  --ink-soft:#4A5A6A;
+  --cobalt:#1E4E8C;
+  --cobalt-deep:#12335E;
+  --cobalt-wash:#E4ECF6;
+  --ochre:#C2702E;
+  --ochre-deep:#8F4E1B;
+  --ochre-wash:#F6EADC;
+  --neutral:#6B7280;
+  --line:#D9D3C4;
+  --radius:14px;
+  --shadow:0 10px 30px rgba(28,43,58,.10);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Karla',-apple-system,'Segoe UI',sans-serif;
+  background:var(--paper);
+  color:var(--ink);
+  line-height:1.55;
+}
+/* ---------- header ---------- */
+header{
+  position:relative;
+  background:var(--cobalt-deep);
+  color:#F4F1E8;
+  overflow:hidden;
+  padding:52px 24px 44px;
+}
+header .tiles{
+  position:absolute;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke='%23FFFFFF' stroke-opacity='0.09' stroke-width='1.4'%3E%3Cpath d='M36 4 L68 36 L36 68 L4 36 Z'/%3E%3Ccircle cx='36' cy='36' r='9'/%3E%3Cpath d='M36 27v18M27 36h18'/%3E%3C/g%3E%3C/svg%3E");
+  background-size:72px 72px;
+}
+header .inner{position:relative;max-width:1180px;margin:0 auto}
+.eyebrow{
+  font-size:12px;letter-spacing:.22em;text-transform:uppercase;
+  color:#A9C2E4;font-weight:700;margin-bottom:10px;
+}
+header h1{
+  font-family:'Fraunces',Georgia,serif;
+  font-weight:700;font-size:clamp(34px,5.5vw,58px);
+  line-height:1.05;letter-spacing:-.01em;
+}
+header h1 em{font-style:italic;color:#E8B36A}
+.header-meta{margin-top:16px;display:flex;flex-wrap:wrap;gap:10px 26px;font-size:15px;color:#C7D6EA}
+.header-meta strong{color:#fff;font-weight:700}
+.legend{margin-top:22px;display:flex;gap:16px;flex-wrap:wrap;font-size:13px}
+.legend span{display:inline-flex;align-items:center;gap:7px;color:#DCE6F2}
+.dot{width:11px;height:11px;border-radius:50%;display:inline-block;box-shadow:0 0 0 2px rgba(255,255,255,.35)}
+.dot.lis{background:#5B8FD4}.dot.alg{background:#E09550}.dot.tra{background:#9AA3AD}
+/* ---------- day tabs ---------- */
+nav.days{
+  position:sticky;top:0;z-index:1000;
+  background:var(--paper-2);
+  border-bottom:1px solid var(--line);
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+}
+nav.days .wrap{max-width:1180px;margin:0 auto;display:flex;gap:4px;padding:10px 16px}
+.daytab{
+  flex:0 0 auto;appearance:none;border:1px solid transparent;background:transparent;
+  font-family:'Karla',sans-serif;font-size:13.5px;font-weight:700;color:var(--ink-soft);
+  padding:8px 13px;border-radius:9px;cursor:pointer;white-space:nowrap;
+  transition:background .15s,color .15s;
+}
+.daytab small{display:block;font-weight:500;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;opacity:.75}
+.daytab:hover{background:#EEEADD}
+.daytab.active{background:var(--ink);color:#F4F1E8}
+.daytab.active[data-region="lisbon"]{background:var(--cobalt)}
+.daytab.active[data-region="algarve"]{background:var(--ochre)}
+.daytab:focus-visible{outline:3px solid var(--cobalt);outline-offset:2px}
+/* ---------- layout ---------- */
+.layout{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) 460px;gap:26px;padding:26px 24px 90px;align-items:start}
+/* map */
+.map-col{position:sticky;top:76px}
+#map{
+  height:calc(100vh - 120px);min-height:420px;max-height:820px;
+  border-radius:var(--radius);box-shadow:var(--shadow);
+  border:1px solid var(--line);z-index:1;
+}
+.map-hint{font-size:12.5px;color:var(--ink-soft);text-align:center;margin-top:8px}
+/* itinerary */
+.day{margin-bottom:36px;scroll-margin-top:86px}
+.day-head{display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
+.day-head h2{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:25px;letter-spacing:-.01em}
+.day-head .dnum{
+  font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  padding:4px 9px;border-radius:6px;color:#fff;
+}
+.day[data-region="lisbon"] .dnum{background:var(--cobalt)}
+.day[data-region="algarve"] .dnum{background:var(--ochre)}
+.day[data-region="transfer"] .dnum{background:var(--neutral)}
+.day-sub{font-size:14.5px;color:var(--ink-soft);margin-bottom:14px}
+/* stop cards */
+.stops{display:flex;flex-direction:column;gap:9px}
+.stop{
+  display:grid;grid-template-columns:58px 1fr auto;gap:14px;align-items:center;
+  background:var(--paper-2);border:1px solid var(--line);border-radius:12px;
+  padding:13px 16px;text-align:left;cursor:pointer;font-family:inherit;font-size:inherit;color:inherit;
+  transition:transform .15s,box-shadow .15s,border-color .15s;
+  width:100%;
+}
+.stop:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+.stop:focus-visible{outline:3px solid var(--cobalt);outline-offset:2px}
+.stop.active{border-color:var(--ink);box-shadow:var(--shadow)}
+.stop .time{font-size:13px;font-weight:700;color:var(--ink-soft);letter-spacing:.02em}
+.stop .name{font-weight:700;font-size:16px}
+.stop .blurb{font-size:13.5px;color:var(--ink-soft);margin-top:2px}
+.stop .chev{
+  width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
+  font-size:14px;color:#fff;flex-shrink:0;
+}
+.stop[data-region="lisbon"] .chev{background:var(--cobalt)}
+.stop[data-region="algarve"] .chev{background:var(--ochre)}
+.stop[data-region="transfer"] .chev{background:var(--neutral)}
+.note{
+  background:transparent;border-left:3px solid var(--line);
+  padding:6px 14px;font-size:13.5px;color:var(--ink-soft);margin-top:4px;
+}
+.note strong{color:var(--ink)}
+/* checklist + practical */
+.panel{
+  background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);
+  padding:22px 24px;margin-bottom:36px;
+}
+.panel h2{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:23px;margin-bottom:4px}
+.panel .sub{font-size:14px;color:var(--ink-soft);margin-bottom:14px}
+.check{list-style:none;display:flex;flex-direction:column;gap:8px}
+.check li{display:flex;gap:11px;align-items:flex-start;font-size:14.5px}
+.check .n{
+  flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--ink);color:#F4F1E8;
+  font-size:12px;font-weight:700;display:grid;place-items:center;margin-top:1px;
+}
+.check li.hot .n{background:#A33B2A}
+.check strong{font-weight:700}
+.check .why{color:var(--ink-soft)}
+/* ---------- detail sheet ---------- */
+.sheet-backdrop{
+  position:fixed;inset:0;background:rgba(18,32,48,.45);z-index:2000;
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.sheet-backdrop.open{opacity:1;pointer-events:auto}
+.sheet{
+  position:fixed;z-index:2001;right:0;top:0;bottom:0;width:min(440px,100vw);
+  background:var(--paper-2);box-shadow:-18px 0 50px rgba(18,32,48,.25);
+  transform:translateX(102%);transition:transform .25s cubic-bezier(.3,.8,.3,1);
+  display:flex;flex-direction:column;overflow-y:auto;
+}
+.sheet.open{transform:translateX(0)}
+.sheet .photo{
+  position:relative;height:250px;flex-shrink:0;background:var(--cobalt-wash);
+}
+.sheet .photo img{width:100%;height:100%;object-fit:cover;display:block}
+.sheet .photo .ph-fallback{
+  position:absolute;inset:0;display:grid;place-items:center;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='%231E4E8C' stroke-opacity='0.25' stroke-width='1.2'%3E%3Cpath d='M28 3 L53 28 L28 53 L3 28 Z'/%3E%3Ccircle cx='28' cy='28' r='7'/%3E%3C/g%3E%3C/svg%3E"),
+    var(--cobalt-wash);
+  font-family:'Fraunces',Georgia,serif;font-size:19px;color:var(--cobalt-deep);
+  text-align:center;padding:20px;
+}
+.sheet .photo .credit{
+  position:absolute;right:8px;bottom:8px;font-size:10.5px;color:#fff;
+  background:rgba(18,32,48,.55);padding:3px 8px;border-radius:6px;
+}
+.sheet .close{
+  position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:50%;
+  background:rgba(18,32,48,.6);color:#fff;border:none;font-size:17px;cursor:pointer;
+  display:grid;place-items:center;
+}
+.sheet .close:focus-visible{outline:3px solid #fff}
+.sheet .body{padding:22px 24px 34px}
+.sheet .region-tag{
+  display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  padding:4px 9px;border-radius:6px;color:#fff;margin-bottom:10px;
+}
+.sheet .region-tag.lisbon{background:var(--cobalt)}
+.sheet .region-tag.algarve{background:var(--ochre)}
+.sheet .region-tag.transfer{background:var(--neutral)}
+.sheet h3{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:27px;line-height:1.1;margin-bottom:12px}
+.sheet .desc{font-size:15px;margin-bottom:16px}
+.sheet .kidtip{
+  background:var(--ochre-wash);border-left:3px solid var(--ochre);
+  padding:11px 14px;border-radius:0 9px 9px 0;font-size:14px;margin-bottom:16px;
+}
+.sheet .kidtip strong{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ochre-deep);margin-bottom:3px}
+.sheet .book{
+  background:var(--cobalt-wash);border-left:3px solid var(--cobalt);
+  padding:11px 14px;border-radius:0 9px 9px 0;font-size:14px;
+}
+.sheet .book strong{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--cobalt-deep);margin-bottom:3px}
+/* leaflet marker */
+.pin{
+  width:26px;height:26px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);
+  border:2.5px solid #fff;box-shadow:0 3px 8px rgba(18,32,48,.35);
+  display:grid;place-items:center;cursor:pointer;
+}
+.pin span{transform:rotate(45deg);color:#fff;font-size:11px;font-weight:800;font-family:'Karla',sans-serif}
+.pin.lisbon{background:var(--cobalt)}
+.pin.algarve{background:var(--ochre)}
+.pin.transfer{background:var(--neutral)}
+.pin.dim{opacity:.28}
+.pin.selected{outline:3px solid var(--ink);outline-offset:1.5px}
+.leaflet-container{font-family:'Karla',sans-serif}
+/* ---------- responsive ---------- */
+@media (max-width:960px){
+  .layout{grid-template-columns:1fr;padding:18px 16px 80px}
+  .map-col{position:sticky;top:58px;z-index:900;order:-1;margin:-6px -4px 14px}
+  #map{height:44vh;min-height:300px}
+  .map-hint{display:none}
+  .sheet{right:0;left:0;top:auto;bottom:0;width:100%;max-height:82vh;border-radius:18px 18px 0 0;
+    transform:translateY(104%)}
+  .sheet.open{transform:translateY(0)}
+  .stop{grid-template-columns:50px 1fr auto;padding:12px 13px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="tiles" aria-hidden="true"></div>
+  <div class="inner">
+    <div class="eyebrow">26 September – 4 October 2026 · YUL ⇄ LIS</div>
+    <h1>Lisbon &amp; the <em>Algarve</em>,<br>eight of us.</h1>
+    <div class="header-meta">
+      <span><strong>6 adults</strong> + kids <strong>4 &amp; 7</strong></span>
+      <span>Lisbon <strong>4 nights</strong> · Ferragudo/Carvoeiro <strong>4 nights</strong></span>
+      <span>8-seat van from <strong>30 Sept</strong>, drop at LIS</span>
+    </div>
+    <div class="legend">
+      <span><i class="dot lis"></i>Lisbon &amp; Sintra</span>
+      <span><i class="dot alg"></i>Algarve</span>
+      <span><i class="dot tra"></i>Transfer</span>
+      <span style="opacity:.8">Tap any stop or pin for photos &amp; details</span>
+    </div>
+  </div>
+</header>
+
+<nav class="days" aria-label="Days">
+  <div class="wrap" id="daytabs"></div>
+</nav>
+
+<div class="layout">
+  <main id="itinerary"></main>
+  <aside class="map-col">
+    <div id="map" role="region" aria-label="Trip map"></div>
+    <p class="map-hint">Pins are numbered by day · click a pin to open its card</p>
+  </aside>
+</div>
+
+<div class="sheet-backdrop" id="backdrop"></div>
+<aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+  <div class="photo">
+    <img id="sheet-img" alt="" style="display:none">
+    <div class="ph-fallback" id="sheet-fallback">Loading photo…</div>
+    <div class="credit" id="sheet-credit" style="display:none">Wikipedia</div>
+    <button class="close" id="sheet-close" aria-label="Close details">✕</button>
+  </div>
+  <div class="body">
+    <span class="region-tag" id="sheet-region"></span>
+    <h3 id="sheet-title"></h3>
+    <p class="desc" id="sheet-desc"></p>
+    <div class="kidtip" id="sheet-kidtip" style="display:none"><strong>With the kids</strong><span id="sheet-kidtip-text"></span></div>
+    <div class="book" id="sheet-book" style="display:none"><strong>Book / know</strong><span id="sheet-book-text"></span></div>
+  </div>
+</aside>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+/* ============ DATA ============ */
+const DEST = {
+  praca:{name:"Praça do Comércio",region:"lisbon",lat:38.7075,lng:-9.1364,
+    wiki:["Praça do Comércio"],
+    desc:"Lisbon's grand riverfront square, rebuilt after the 1755 earthquake — a huge open plaza facing the Tagus, framed by yellow arcades and a triumphal arch. Flat, open, and right by the water.",
+    kid:"Perfect arrival-day spot: the kids run the plaza and the Ribeira das Naus waterfront steps while the adults sit with a coffee.",
+    book:null},
+  jeronimos:{name:"Jerónimos Monastery",region:"lisbon",lat:38.6979,lng:-9.2065,
+    wiki:["Jerónimos Monastery"],
+    desc:"A 500-year-old monastery in carved limestone — Manueline style, meaning stone carved into ropes, knots and sea monsters. Vasco da Gama is buried inside. The two-storey cloister is the showpiece.",
+    kid:"Do it at opening before the crowds. About an hour is plenty; the cloister courtyard gives them space to move.",
+    book:"Timed entry — book online in advance."},
+  torre:{name:"Torre de Belém",region:"lisbon",lat:38.6916,lng:-9.2160,
+    wiki:["Belém Tower"],
+    desc:"A small 16th-century fortress standing in the river — the classic 'real castle' silhouette, complete with a stone rhinoceros carved on one corner. Guarded the harbour entrance for 500 years.",
+    kid:"View it from outside. The interior is one narrow spiral staircase on a timed queue — miserable with a 4-year-old, and the best angle is from the shore anyway.",
+    book:null},
+  pasteis:{name:"Pastéis de Belém",region:"lisbon",lat:38.6975,lng:-9.2033,
+    wiki:["Pastéis de Belém"],
+    desc:"The bakery that has made the original pastel de nata since 1837, to a recipe from the monastery next door. Warm custard tarts, cinnamon on top, a queue out the door.",
+    kid:"With 8 people, skip the takeaway line and head to the sit-down rooms at the back — usually faster, and everyone gets a seat.",
+    book:null},
+  regaleira:{name:"Quinta da Regaleira",region:"lisbon",lat:38.7963,lng:-9.3961,
+    wiki:["Quinta da Regaleira"],
+    desc:"An eccentric millionaire's estate in Sintra full of grottoes, secret tunnels and the Initiation Well — a 27-metre inverted tower you spiral down inside, exiting through underground passages behind a waterfall.",
+    kid:"The single best kid attraction of the Lisbon half. Do it first, fresh, before anyone tires. Allow 2–2.5 hours.",
+    book:"Book online. 10-min walk or a tuk-tuk from Sintra station."},
+  pena:{name:"Pena Palace",region:"lisbon",lat:38.7876,lng:-9.3906,
+    wiki:["Pena Palace"],
+    desc:"A 19th-century royal palace on a mountaintop, painted ochre-yellow and terracotta-red — domes, battlements, a drawbridge and a tunnel, like something drawn by a 7-year-old with excellent taste.",
+    kid:"Take the park-only ticket (~€10): the terraces, ramparts and drawbridge are the parts kids love. The state rooms are a slow indoor shuffle.",
+    book:"Timed tickets sell out — book ahead, afternoon slot. Buy the park shuttle WITH the ticket; it can't be bought at the stop and the alternative is a steep 20-25 min climb."},
+  oceanario:{name:"Oceanário de Lisboa",region:"lisbon",lat:38.7633,lng:-9.0950,
+    wiki:["Lisbon Oceanarium"],
+    desc:"One of Europe's best aquariums, built around a single vast central tank you circle on two levels — sunfish, rays and sharks — with Atlantic, Antarctic (puffins), Pacific (sea otters) and Indian Ocean side habitats.",
+    kid:"Go at opening. 2–2.5 hours. The otters and puffins are in the side galleries — don't let the big tank eat all the time.",
+    book:"Timed ticket, book online."},
+  telecabine:{name:"Telecabine (cable car)",region:"lisbon",lat:38.7670,lng:-9.0940,
+    wiki:["Telecabine Lisboa","Parque das Nações"],
+    desc:"A gondola gliding 8 minutes along the river through Parque das Nações, the modern Expo '98 district — glass cabins with views over the Vasco da Gama bridge, Europe's second-longest.",
+    kid:"Pure 4-year-old catnip, right after the aquarium. Ride one way, walk back along the water.",
+    book:null},
+  alfama:{name:"Alfama",region:"lisbon",lat:38.7118,lng:-9.1301,
+    wiki:["Alfama"],
+    desc:"Lisbon's oldest quarter — a hillside maze of tiled façades, laundry lines, stairways and viewpoints, crowned by São Jorge castle. It survived the 1755 earthquake, so it's the one truly medieval part of the city.",
+    kid:"Go late afternoon when cruise crowds thin. Start at Miradouro das Portas do Sol and wander downhill. Skip riding tram 28 — packed, standing-room, pickpockets — but the photo of it is free.",
+    book:null},
+  comporta:{name:"Comporta (lunch stop)",region:"transfer",lat:38.3820,lng:-8.7870,
+    wiki:["Comporta (Alcácer do Sal)","Comporta"],
+    desc:"A drive-day detour on the way south: rice paddies, umbrella pines, storks nesting on poles, and a scattering of laid-back restaurants. Twenty minutes off the A2 and a completely different landscape.",
+    kid:"Good leg-stretch at the halfway point of the 2.5-hour drive.",
+    book:null},
+  ferragudo:{name:"Ferragudo (home base)",region:"algarve",lat:37.1230,lng:-8.5210,
+    wiki:["Ferragudo"],
+    desc:"A working fishing village on the Arade estuary that kept its soul — whitewashed lanes tumbling to a palm-lined square, small boats, a castle across the water. Your base for the Algarve half.",
+    kid:"The village square is full of relaxed restaurants; Praia Grande beach is a flat 10-minute walk. Big grocery run in Lagoa or Portimão on arrival day.",
+    book:"Villa with pool, sleeps 8 — book immediately, this is the scarce item."},
+  benagil:{name:"Benagil Cave",region:"algarve",lat:37.0870,lng:-8.4260,
+    wiki:["Benagil"],
+    desc:"The famous domed sea cave with a round skylight in its roof — a cathedral of ochre rock lit from above. Since 2024, entry is licensed boats and guided kayaks only; no landing on the sand inside, and time inside is capped at a few minutes.",
+    kid:"Frame it as one highlight of the boat trip, not the destination. Morning light through the oculus (9–11am) is the best show.",
+    book:"Book a coastal caves tour from Carvoeiro (shortest crossing) or Portimão (biggest fleet). Morning = calmest sea."},
+  marinha:{name:"Praia da Marinha",region:"algarve",lat:37.0900,lng:-8.4123,
+    wiki:["Praia da Marinha"],
+    desc:"Routinely listed among Europe's most beautiful beaches — golden cliffs, sea stacks and a double arch you can view from the clifftop path, the start of the Seven Hanging Valleys trail.",
+    kid:"Walk a short 30–45 min leg of the clifftop trail for the arches from above, then retreat to the villa pool. Keep kids well back from edges — no barriers.",
+    book:null},
+  piedade:{name:"Ponta da Piedade",region:"algarve",lat:37.0800,lng:-8.6690,
+    wiki:["Ponta da Piedade"],
+    desc:"A headland of golden arches, tunnels and grottoes at Lagos. Small open boats thread through the maze at water level — ochre rock, turquoise water, close enough to touch.",
+    kid:"The single best kid thing in the Algarve. ~45 minutes, cheap, cash, walk-up from Lagos marina. No fitness required.",
+    book:"Usually walk-up; go before 4pm for light."},
+  lagos:{name:"Lagos old town",region:"algarve",lat:37.1020,lng:-8.6740,
+    wiki:["Lagos, Portugal"],
+    desc:"A walled maritime town with cobbled lanes, a lively marina and deep Age of Discovery history — the voyages to Africa launched from here in the 1400s.",
+    kid:"Post-boat wander and ice cream. Forty minutes from Ferragudo.",
+    book:null},
+  sagres:{name:"Fortaleza de Sagres",region:"algarve",lat:37.0007,lng:-8.9490,
+    wiki:["Sagres Point","Sagres (Vila do Bispo)"],
+    desc:"A fortress on a vast clifftop plateau at the wind-blasted southwestern corner of Europe, tied to Henry the Navigator's school of exploration. A giant stone compass rose is set into the ground.",
+    kid:"The kids can run flat-out for an hour across the plateau. Bring windbreakers — it howls.",
+    book:null},
+  cabosv:{name:"Cabo de São Vicente",region:"algarve",lat:37.0231,lng:-8.9962,
+    wiki:["Cape St. Vincent"],
+    desc:"The lighthouse at the literal end of the old known world — for centuries Europe's last sight of land before the open Atlantic. Sixty-metre cliffs and one of the most powerful lighthouses in Europe.",
+    kid:"A 20–30 minute stop. The bratwurst van at the gate bills itself as 'the last sausage before America.'",
+    book:null},
+  silves:{name:"Silves Castle",region:"algarve",lat:37.1911,lng:-8.4396,
+    wiki:["Silves Castle","Silves, Portugal"],
+    desc:"The Algarve's best-preserved Moorish castle — massive red sandstone walls above a hillside town that was once the Islamic capital of the region. You walk the full circuit of the battlements.",
+    kid:"Castle-shaped, not palace-shaped: walls to patrol, towers to climb. 1.5 hours, then a riverside lunch. Only 25 min from base.",
+    book:null},
+  zoomarine:{name:"Zoomarine",region:"algarve",lat:37.1250,lng:-8.3210,
+    wiki:["Zoomarine Algarve","Zoomarine"],
+    desc:"A marine-themed park at Guia: dolphin presentations, aquaria, pools with slides and a small funfair. Polished, easy, and entirely aimed at your children's demographic.",
+    kid:"This eats a whole day — deploy it only if the kids have earned a payday. The pool zone means bring swim gear.",
+    book:"Book online for gate savings; check show times on arrival."},
+  airport:{name:"Lisbon Airport (LIS)",region:"transfer",lat:38.7756,lng:-9.1354,
+    wiki:["Lisbon Airport"],
+    desc:"Humberto Delgado Airport. Arrival Sept 26 at 10:30; departure Oct 4 at 18:30. The van gets dropped here on the way out.",
+    kid:null,
+    book:"Oct 4: leave Ferragudo by 12:30, van return by 15:15 (allow a full 30 min), check-in by 16:00. Non-Schengen exit — take the time seriously."}
+};
+
+const DAYS = [
+  {id:"d1",num:"Sat 26",title:"Arrival — nothing scheduled",region:"lisbon",
+   sub:"Land 10:30 · pre-booked 8-seat transfer · check-in ~15:00. The 4-year-old is running on fumes; this day will not go to plan and that's fine.",
+   stops:[
+     {t:"10:30",d:"airport",b:"Land · passport control can run 45 min"},
+     {t:"14:30",d:"praca",b:"One flat easy walk — plaza + waterfront"},
+   ],
+   note:"<strong>Early dinner near the apartment, bed by 20:00.</strong> Book nothing else today."},
+  {id:"d2",num:"Sun 27",title:"Belém — half day only",region:"lisbon",
+   sub:"Two Ubers or tram 15E from Cais do Sodré. Back for naps by 15:30.",
+   stops:[
+     {t:"09:30",d:"jeronimos",b:"At opening · the carved cloister · ~1 hr"},
+     {t:"10:45",d:"pasteis",b:"The original custard tarts, since 1837"},
+     {t:"11:30",d:"torre",b:"The river fortress — from outside"},
+   ],
+   note:"Lunch in Belém, kids run in the Jardim da Praça do Império, home for naps. Optional adult shift at Time Out Market in the evening."},
+  {id:"d3",num:"Mon 28",title:"Sintra — by train, not by car",region:"lisbon",
+   sub:"Rossio → Sintra, ~40 min. Cars can't reach Pena from the historic centre; the train is strictly better. Bring layers — Sintra runs its own cooler, mistier microclimate.",
+   stops:[
+     {t:"10:15",d:"regaleira",b:"Tunnels, grottoes, the Initiation Well · 2–2.5 hrs"},
+     {t:"15:00",d:"pena",b:"Park-only ticket + pre-bought shuttle"},
+   ],
+   note:"<strong>Escape hatch:</strong> if the 4-year-old melts after Regaleira, go home — Regaleira alone justifies the day, and Pena tickets reschedule free within a year."},
+  {id:"d4",num:"Tue 29",title:"Aquarium morning, Alfama evening",region:"lisbon",
+   sub:"Metro red line to Oriente. Naps in the middle. Skip riding tram 28.",
+   stops:[
+     {t:"10:00",d:"oceanario",b:"At opening · the giant central tank · 2–2.5 hrs"},
+     {t:"14:00",d:"telecabine",b:"8 glass-cabin minutes along the river"},
+     {t:"17:00",d:"alfama",b:"Old-town wander when the crowds thin"},
+   ],
+   note:"Swap-in if needed: <strong>Pilar 7</strong> — the glass floor out on the 25 de Abril bridge deck."},
+  {id:"d5",num:"Wed 30",title:"South — pick up the van, drive to the Algarve",region:"transfer",
+   sub:"Collect the 8-seater downtown at 08:30–09:00 (Sixt Picoas / Europcar Castilho), fit the child seats, confirm the Via Verde toll transponder, then the A2 south (~2h30).",
+   stops:[
+     {t:"11:30",d:"comporta",b:"Optional lunch detour — rice paddies & storks"},
+     {t:"13:30",d:"ferragudo",b:"Arrive · big grocery shop · settle in"},
+   ],
+   note:"Check-in usually 15:00 — eat first. Dinner in the village square."},
+  {id:"d6",num:"Thu 1",title:"Boats — caves & dolphins",region:"algarve",
+   sub:"Morning = calmest sea and the best light through the Benagil skylight. Book ahead.",
+   stops:[
+     {t:"09:00",d:"benagil",b:"Coastal caves tour · Benagil is one stop, not the point"},
+     {t:"14:30",d:"marinha",b:"Clifftop arches · short trail leg · then pool"},
+   ],
+   note:"If anyone's seasick-prone, take the bigger catamaran and view the cave rather than enter it. <strong>Vacuum the sand out of the van before return day.</strong>"},
+  {id:"d7",num:"Fri 2",title:"The end of the world — Sagres & Lagos",region:"algarve",
+   sub:"The long day. If it's too much, cut Sagres and do Lagos only from 13:00.",
+   stops:[
+     {t:"10:30",d:"sagres",b:"Clifftop fortress · kids run the plateau"},
+     {t:"12:00",d:"cabosv",b:"The last lighthouse before America"},
+     {t:"15:30",d:"piedade",b:"Grotto boats — the kids' best 45 minutes"},
+     {t:"17:00",d:"lagos",b:"Old town wander · ice cream"},
+   ],
+   note:"Home ~40 min from Lagos."},
+  {id:"d8",num:"Sat 3",title:"Slack day — pick one, or none",region:"algarve",
+   sub:"Day eight of a trip with a 4-year-old. 'Nothing but the pool' is a legitimate answer.",
+   stops:[
+     {t:"opt A",d:"silves",b:"Moorish castle, half day — leaves the afternoon free"},
+     {t:"opt B",d:"zoomarine",b:"Full-day marine park — the kids' payday"},
+   ],
+   note:"<strong>Recommendation: Silves.</strong> Half a day out, half in the pool."},
+  {id:"d9",num:"Sun 4",title:"Departure",region:"transfer",
+   sub:"Last swim at 08:00, check out 11:00, early lunch in Ferragudo.",
+   stops:[
+     {t:"12:30",d:"airport",b:"Depart — non-negotiable · van back by 15:15 · fly 18:30"},
+   ],
+   note:"Oct 5 is Republic Day (national holiday) — expect a busier-than-usual Sunday on the A2 and at LIS. Nervous? Leave at 12:00. Fuel before the airport."}
+];
+
+/* ============ MAP ============ */
+const map = L.map('map',{scrollWheelZoom:true,zoomControl:true});
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  maxZoom:19,attribution:'&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+const markers = {};       // destId -> {marker, el}
+const destDayNum = {};    // destId -> day index label
+DAYS.forEach((day,di)=>{
+  day.stops.forEach(s=>{ if(!(s.d in destDayNum)) destDayNum[s.d] = di+1; });
+});
+
+Object.entries(DEST).forEach(([id,d])=>{
+  const el = document.createElement('div');
+  el.className = `pin ${d.region}`;
+  el.innerHTML = `<span>${destDayNum[id]||''}</span>`;
+  const icon = L.divIcon({className:'',html:el.outerHTML,iconSize:[26,26],iconAnchor:[13,24]});
+  const m = L.marker([d.lat,d.lng],{icon,title:d.name,keyboard:true}).addTo(map);
+  m.on('click',()=>selectDest(id,{scrollCard:true}));
+  markers[id] = m;
+});
+
+function fitAll(){
+  const b = L.latLngBounds(Object.values(DEST).map(d=>[d.lat,d.lng]));
+  map.fitBounds(b,{padding:[36,36]});
+}
+fitAll();
+
+function setMarkerState(activeIds,selectedId){
+  Object.entries(markers).forEach(([id,m])=>{
+    const icon = m.getElement()?.querySelector('.pin');
+    if(!icon) return;
+    icon.classList.toggle('dim', activeIds && !activeIds.has(id));
+    icon.classList.toggle('selected', id===selectedId);
+  });
+}
+
+/* ============ ITINERARY RENDER ============ */
+const itin = document.getElementById('itinerary');
+
+/* booking checklist */
+const panel = document.createElement('section');
+panel.className='panel';
+panel.innerHTML = `
+  <h2>Book first, sightsee later</h2>
+  <p class="sub">Ordered by scarcity. Items 1–4 this week.</p>
+  <ul class="check">
+    <li class="hot"><span class="n">1</span><div><strong>Flights YUL–LIS ×8</strong> — <span class="why">biggest cost swing, do it first.</span></div></li>
+    <li class="hot"><span class="n">2</span><div><strong>Algarve villa with pool, sleeps 8</strong> — <span class="why">Ferragudo / Carvoeiro / Lagoa. The scarcest lodging item.</span></div></li>
+    <li class="hot"><span class="n">3</span><div><strong>Lisbon apartment(s), sleeps 8</strong> — <span class="why">two adjacent 2-beds beats one 4-bed: easier to find, better for bedtimes.</span></div></li>
+    <li class="hot"><span class="n">4</span><div><strong>8-seat van, Sept 30 → Oct 4</strong> — <span class="why">downtown pickup, airport drop. Confirm the branch actually holds an 8-seater. Add 2 child seats (ECE R44/R129 — Canadian seats generally don't qualify).</span></div></li>
+    <li><span class="n">5</span><div><strong>Airport transfer with child seats, Sept 26</strong> — <span class="why">don't improvise at 10:30 with luggage and two wrecked kids.</span></div></li>
+    <li><span class="n">6</span><div><strong>Pena park ticket + shuttle</strong>, <strong>Regaleira</strong>, <strong>Jerónimos</strong>, <strong>Oceanário</strong> — <span class="why">all timed entries, all online.</span></div></li>
+    <li><span class="n">7</span><div><strong>Benagil boat tour</strong> — <span class="why">morning departure, Carvoeiro or Portimão.</span></div></li>
+    <li><span class="n">8</span><div><strong>Dinner tables for 8</strong> — <span class="why">Ferragudo & Carvoeiro rooms are small; reserve ahead.</span></div></li>
+  </ul>`;
+itin.appendChild(panel);
+
+/* day tabs */
+const tabs = document.getElementById('daytabs');
+const allTab = document.createElement('button');
+allTab.className='daytab active';
+allTab.innerHTML=`Whole trip<small>all pins</small>`;
+allTab.addEventListener('click',()=>activateDay(null));
+tabs.appendChild(allTab);
+
+DAYS.forEach((day,di)=>{
+  const b = document.createElement('button');
+  b.className='daytab';
+  b.dataset.region=day.region;
+  b.innerHTML=`${day.num}<small>day ${di+1}</small>`;
+  b.addEventListener('click',()=>activateDay(di,true));
+  tabs.appendChild(b);
+});
+
+/* day sections */
+DAYS.forEach((day,di)=>{
+  const sec = document.createElement('section');
+  sec.className='day';
+  sec.id=day.id;
+  sec.dataset.region=day.region;
+  const stopsHtml = day.stops.map(s=>{
+    const d = DEST[s.d];
+    return `<button class="stop" data-dest="${s.d}" data-region="${d.region}">
+      <span class="time">${s.t}</span>
+      <span><span class="name">${d.name}</span><br><span class="blurb">${s.b}</span></span>
+      <span class="chev">›</span>
+    </button>`;
+  }).join('');
+  sec.innerHTML = `
+    <div class="day-head"><span class="dnum">Day ${di+1} · ${day.num}</span><h2>${day.title}</h2></div>
+    <p class="day-sub">${day.sub}</p>
+    <div class="stops">${stopsHtml}</div>
+    ${day.note?`<p class="note">${day.note}</p>`:''}`;
+  itin.appendChild(sec);
+});
+
+/* practical footer panel */
+const prac = document.createElement('section');
+prac.className='panel';
+prac.innerHTML = `
+  <h2>Practical</h2>
+  <ul class="check">
+    <li><span class="n">🕐</span><div><strong>Jet lag:</strong> <span class="why">Montreal +5h. Kids wake early, fade by mid-afternoon — every big sight here is scheduled at opening, every day has an exit.</span></div></li>
+    <li><span class="n">🌡</span><div><strong>Weather:</strong> <span class="why">Lisbon 24–26°C, Algarve a touch warmer, sea ~19–20°C (cold after Mexico — the kids won't care). Sintra is its own cooler microclimate.</span></div></li>
+    <li><span class="n">🚐</span><div><strong>Van:</strong> <span class="why">full-to-full fuel only · confirm Via Verde toll device price · video the car at pickup AND return, inside included · vacuum the beach sand out before returning.</span></div></li>
+    <li><span class="n">🚕</span><div><strong>Lisbon =</strong> <span class="why">Uber ×2 per hop, metro, and walking. No car, no parking, no exceptions.</span></div></li>
+    <li><span class="n">💶</span><div><strong>Cash:</strong> <span class="why">small notes for the Ponta da Piedade boats and markets; cards everywhere else.</span></div></li>
+  </ul>`;
+itin.appendChild(prac);
+
+/* ============ INTERACTION ============ */
+let currentDay = null;
+let selectedDest = null;
+
+function activateDay(di, flyTo){
+  currentDay = di;
+  document.querySelectorAll('.daytab').forEach((t,i)=>t.classList.toggle('active', i===(di===null?0:di+1)));
+  if(di===null){
+    setMarkerState(null, selectedDest);
+    fitAll();
+  }else{
+    const day = DAYS[di];
+    const ids = new Set(day.stops.map(s=>s.d));
+    setMarkerState(ids, selectedDest);
+    if(flyTo){
+      const pts = day.stops.map(s=>[DEST[s.d].lat,DEST[s.d].lng]);
+      if(pts.length===1) map.flyTo(pts[0], 12, {duration:.8});
+      else map.flyToBounds(L.latLngBounds(pts),{padding:[46,46],duration:.8});
+    }
+    document.getElementById(day.id).scrollIntoView({behavior:'smooth',block:'start'});
+  }
+}
+
+/* image loading via Wikipedia REST summary (CORS-open), with graceful fallback */
+const imgCache = {};
+async function loadImage(id){
+  if(imgCache[id]) return imgCache[id];
+  const d = DEST[id];
+  for(const title of d.wiki){
+    try{
+      const r = await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(title));
+      if(!r.ok) continue;
+      const j = await r.json();
+      const src = (j.originalimage && j.originalimage.source) || (j.thumbnail && j.thumbnail.source);
+      if(src){ imgCache[id]=src; return src; }
+    }catch(e){/* try next */}
+  }
+  imgCache[id]=null;
+  return null;
+}
+
+const sheet = document.getElementById('sheet');
+const backdrop = document.getElementById('backdrop');
+const shImg = document.getElementById('sheet-img');
+const shFall = document.getElementById('sheet-fallback');
+const shCredit = document.getElementById('sheet-credit');
+
+async function selectDest(id,{scrollCard=false}={}){
+  selectedDest = id;
+  const d = DEST[id];
+  /* cards */
+  document.querySelectorAll('.stop').forEach(c=>c.classList.toggle('active', c.dataset.dest===id));
+  if(scrollCard){
+    const card = document.querySelector(`.stop[data-dest="${id}"]`);
+    if(card) card.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+  /* map */
+  setMarkerState(currentDay===null?null:new Set(DAYS[currentDay].stops.map(s=>s.d)), id);
+  map.flyTo([d.lat,d.lng], Math.max(map.getZoom(),12), {duration:.7});
+  /* sheet content */
+  document.getElementById('sheet-region').textContent = d.region==='lisbon'?'Lisbon & Sintra':d.region==='algarve'?'Algarve':'Transfer';
+  document.getElementById('sheet-region').className='region-tag '+d.region;
+  document.getElementById('sheet-title').textContent=d.name;
+  document.getElementById('sheet-desc').textContent=d.desc;
+  const kt=document.getElementById('sheet-kidtip');
+  if(d.kid){kt.style.display='block';document.getElementById('sheet-kidtip-text').textContent=d.kid;}
+  else kt.style.display='none';
+  const bk=document.getElementById('sheet-book');
+  if(d.book){bk.style.display='block';document.getElementById('sheet-book-text').textContent=d.book;}
+  else bk.style.display='none';
+  /* photo */
+  shImg.style.display='none'; shCredit.style.display='none';
+  shFall.style.display='grid'; shFall.textContent='Loading photo…';
+  sheet.classList.add('open'); backdrop.classList.add('open');
+  const src = await loadImage(id);
+  if(selectedDest!==id) return; // user moved on
+  if(src){
+    shImg.onload = ()=>{ shImg.style.display='block'; shFall.style.display='none'; shCredit.style.display='block'; };
+    shImg.onerror = ()=>{ shFall.textContent=d.name; };
+    shImg.alt = d.name;
+    shImg.src = src;
+  }else{
+    shFall.textContent = d.name;
+  }
+}
+
+function closeSheet(){
+  sheet.classList.remove('open'); backdrop.classList.remove('open');
+  selectedDest=null;
+  document.querySelectorAll('.stop').forEach(c=>c.classList.remove('active'));
+  setMarkerState(currentDay===null?null:new Set(DAYS[currentDay].stops.map(s=>s.d)), null);
+}
+document.getElementById('sheet-close').addEventListener('click',closeSheet);
+backdrop.addEventListener('click',closeSheet);
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSheet(); });
+
+document.querySelectorAll('.stop').forEach(c=>{
+  c.addEventListener('click',()=>selectDest(c.dataset.dest));
+});
+</script>
+</body>
+</html>
