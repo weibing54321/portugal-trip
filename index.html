@@ -161,9 +161,38 @@ nav.days .wrap{max-width:1180px;margin:0 auto;display:flex;gap:4px;padding:10px 
 }
 .sheet.open{transform:translateX(0)}
 .sheet .photo{
-  position:relative;height:250px;flex-shrink:0;background:var(--cobalt-wash);
+  position:relative;height:260px;flex-shrink:0;background:var(--cobalt-wash);overflow:hidden;
 }
-.sheet .photo img{width:100%;height:100%;object-fit:cover;display:block}
+.ph-track{
+  display:flex;height:100%;overflow-x:auto;overflow-y:hidden;
+  scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+}
+.ph-track::-webkit-scrollbar{display:none}
+.ph-slide{
+  flex:0 0 100%;height:100%;scroll-snap-align:start;scroll-snap-stop:always;
+  background:var(--cobalt-wash);
+}
+.ph-slide img{width:100%;height:100%;object-fit:cover;display:block}
+.ph-arrow{
+  position:absolute;top:50%;transform:translateY(-50%);z-index:5;
+  width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;
+  background:rgba(18,32,48,.55);color:#fff;font-size:20px;line-height:1;
+  display:grid;place-items:center;transition:background .15s;
+}
+.ph-arrow:hover{background:rgba(18,32,48,.8)}
+.ph-arrow:focus-visible{outline:3px solid #fff}
+.ph-arrow.prev{left:10px}
+.ph-arrow.next{right:10px}
+.ph-dots{
+  position:absolute;bottom:10px;left:50%;transform:translateX(-50%);z-index:5;
+  display:flex;gap:6px;padding:5px 9px;border-radius:99px;background:rgba(18,32,48,.35);
+  max-width:70%;overflow:hidden;
+}
+.ph-dots i{
+  flex-shrink:0;width:7px;height:7px;border-radius:50%;
+  background:rgba(255,255,255,.45);transition:background .15s,transform .15s;
+}
+.ph-dots i.on{background:#fff;transform:scale(1.25)}
 .sheet .photo .ph-fallback{
   position:absolute;inset:0;display:grid;place-items:center;
   background:
@@ -268,8 +297,11 @@ nav.days .wrap{max-width:1180px;margin:0 auto;display:flex;gap:4px;padding:10px 
 <div class="sheet-backdrop" id="backdrop"></div>
 <aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
   <div class="photo">
-    <img id="sheet-img" alt="" style="display:none">
-    <div class="ph-fallback" id="sheet-fallback">Loading photo…</div>
+    <div class="ph-track" id="ph-track" aria-label="Photo gallery"></div>
+    <div class="ph-fallback" id="sheet-fallback">Loading photos…</div>
+    <button class="ph-arrow prev" id="ph-prev" aria-label="Previous photo" style="display:none">‹</button>
+    <button class="ph-arrow next" id="ph-next" aria-label="Next photo" style="display:none">›</button>
+    <div class="ph-dots" id="ph-dots" style="display:none"></div>
     <div class="credit" id="sheet-credit" style="display:none">Wikipedia</div>
     <button class="close" id="sheet-close" aria-label="Close details">✕</button>
   </div>
@@ -591,29 +623,94 @@ function activateDay(di, flyTo){
   }
 }
 
-/* image loading via Wikipedia REST summary (CORS-open), with graceful fallback */
+/* image loading via Wikipedia REST media-list (CORS-open), with graceful fallback.
+   Pulls every photo on the article page(s), filtered of maps/logos/crests. */
+const IMG_SKIP = /\.svg$|\.ogg$|\.webm$|map|location|coat[_ ]of|flag|logo|icon|escudo|bras[aã]o|seal|banner|montage[_ ]?collage/i;
+const MAX_PHOTOS = 10;
 const imgCache = {};
-async function loadImage(id){
+async function loadImages(id){
   if(imgCache[id]) return imgCache[id];
   const d = DEST[id];
+  const urls = [], seen = new Set();
   for(const title of d.wiki){
     try{
-      const r = await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(title));
+      const r = await fetch('https://en.wikipedia.org/api/rest_v1/page/media-list/'+encodeURIComponent(title));
       if(!r.ok) continue;
       const j = await r.json();
-      const src = (j.originalimage && j.originalimage.source) || (j.thumbnail && j.thumbnail.source);
-      if(src){ imgCache[id]=src; return src; }
-    }catch(e){/* try next */}
+      for(const it of (j.items||[])){
+        if(it.type!=='image') continue;
+        if(IMG_SKIP.test(it.title||'')) continue;
+        const src = it.srcset && it.srcset[0] && it.srcset[0].src;
+        if(!src || seen.has(it.title)) continue;
+        seen.add(it.title);
+        urls.push(('//'===src.slice(0,2)?'https:':'')+src);
+        if(urls.length>=MAX_PHOTOS) break;
+      }
+    }catch(e){/* try next title */}
+    if(urls.length>=MAX_PHOTOS) break;
   }
-  imgCache[id]=null;
-  return null;
+  imgCache[id]=urls;
+  return urls;
 }
+/* media-list thumbs come back small (~500px); ask Wikimedia for a wider render */
+function upscale(u,w){ return u.replace(/\/(\d+)px-/, '/'+w+'px-'); }
 
 const sheet = document.getElementById('sheet');
 const backdrop = document.getElementById('backdrop');
-const shImg = document.getElementById('sheet-img');
 const shFall = document.getElementById('sheet-fallback');
 const shCredit = document.getElementById('sheet-credit');
+
+/* ============ PHOTO CAROUSEL ============ */
+const phTrack = document.getElementById('ph-track');
+const phDots = document.getElementById('ph-dots');
+const phPrev = document.getElementById('ph-prev');
+const phNext = document.getElementById('ph-next');
+let phCount = 0;
+
+function phIndex(){
+  return phTrack.clientWidth ? Math.round(phTrack.scrollLeft/phTrack.clientWidth) : 0;
+}
+function phUpdate(){
+  const i = phIndex();
+  phDots.querySelectorAll('i').forEach((d,k)=>d.classList.toggle('on',k===i));
+  if(phCount>1) shCredit.textContent = (i+1)+' / '+phCount+' · Wikipedia';
+}
+function phGo(dir){
+  phTrack.scrollBy({left:dir*phTrack.clientWidth,behavior:'smooth'});
+}
+phPrev.addEventListener('click',()=>phGo(-1));
+phNext.addEventListener('click',()=>phGo(1));
+phTrack.addEventListener('scroll',()=>requestAnimationFrame(phUpdate),{passive:true});
+
+function clearCarousel(){
+  phTrack.innerHTML=''; phDots.innerHTML=''; phCount=0;
+  phPrev.style.display=phNext.style.display=phDots.style.display='none';
+}
+function renderCarousel(urls,name){
+  clearCarousel();
+  phCount = urls.length;
+  urls.forEach((u,i)=>{
+    const slide = document.createElement('div');
+    slide.className='ph-slide';
+    const img = document.createElement('img');
+    img.loading = i===0 ? 'eager' : 'lazy';
+    img.alt = name+' — photo '+(i+1)+' of '+urls.length;
+    img.src = upscale(u,1000);
+    img.onerror = ()=>{ if(!img.dataset.retried){ img.dataset.retried='1'; img.src=u; } };
+    slide.appendChild(img);
+    phTrack.appendChild(slide);
+    const dot = document.createElement('i');
+    phDots.appendChild(dot);
+  });
+  phTrack.scrollLeft = 0;
+  if(phCount>1){
+    phPrev.style.display=phNext.style.display='grid';
+    phDots.style.display='flex';
+  }
+  shCredit.textContent = phCount>1 ? '1 / '+phCount+' · Wikipedia' : 'Wikipedia';
+  shCredit.style.display='block';
+  phUpdate();
+}
 
 async function selectDest(id,{scrollCard=false}={}){
   selectedDest = id;
@@ -638,17 +735,16 @@ async function selectDest(id,{scrollCard=false}={}){
   const bk=document.getElementById('sheet-book');
   if(d.book){bk.style.display='block';document.getElementById('sheet-book-text').textContent=d.book;}
   else bk.style.display='none';
-  /* photo */
-  shImg.style.display='none'; shCredit.style.display='none';
-  shFall.style.display='grid'; shFall.textContent='Loading photo…';
+  /* photos */
+  clearCarousel();
+  shCredit.style.display='none';
+  shFall.style.display='grid'; shFall.textContent='Loading photos…';
   sheet.classList.add('open'); backdrop.classList.add('open');
-  const src = await loadImage(id);
+  const urls = await loadImages(id);
   if(selectedDest!==id) return; // user moved on
-  if(src){
-    shImg.onload = ()=>{ shImg.style.display='block'; shFall.style.display='none'; shCredit.style.display='block'; };
-    shImg.onerror = ()=>{ shFall.textContent=d.name; };
-    shImg.alt = d.name;
-    shImg.src = src;
+  if(urls.length){
+    shFall.style.display='none';
+    renderCarousel(urls, d.name);
   }else{
     shFall.textContent = d.name;
   }
@@ -662,7 +758,13 @@ function closeSheet(){
 }
 document.getElementById('sheet-close').addEventListener('click',closeSheet);
 backdrop.addEventListener('click',closeSheet);
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSheet(); });
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') closeSheet();
+  if(sheet.classList.contains('open') && phCount>1){
+    if(e.key==='ArrowLeft') phGo(-1);
+    if(e.key==='ArrowRight') phGo(1);
+  }
+});
 
 document.querySelectorAll('.stop').forEach(c=>{
   c.addEventListener('click',()=>selectDest(c.dataset.dest));
