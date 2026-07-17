@@ -25,6 +25,7 @@
   --shadow:0 10px 30px rgba(28,43,58,.10);
 }
 *{box-sizing:border-box;margin:0;padding:0}
+button{touch-action:manipulation}
 html{scroll-behavior:smooth}
 body{
   font-family:'Karla',-apple-system,'Segoe UI',sans-serif;
@@ -92,6 +93,16 @@ nav.days .wrap{max-width:1180px;margin:0 auto;display:flex;gap:4px;padding:10px 
   border:1px solid var(--line);z-index:1;
 }
 .map-hint{font-size:12.5px;color:var(--ink-soft);text-align:center;margin-top:8px}
+/* floating map toggle — mobile only */
+.map-fab{
+  position:fixed;bottom:18px;right:16px;z-index:1600;display:none;
+  align-items:center;gap:8px;padding:13px 19px;border-radius:99px;border:none;cursor:pointer;
+  background:var(--ink);color:#F4F1E8;font-family:'Karla',sans-serif;font-size:15px;font-weight:700;
+  box-shadow:0 6px 22px rgba(18,32,48,.4);
+}
+.map-fab svg{width:17px;height:17px;flex-shrink:0}
+.map-fab:focus-visible{outline:3px solid var(--cobalt);outline-offset:2px}
+body.map-open .map-fab{background:var(--paper-2);color:var(--ink)}
 /* itinerary */
 .day{margin-bottom:36px;scroll-margin-top:86px}
 .day-head{display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
@@ -246,15 +257,42 @@ nav.days .wrap{max-width:1180px;margin:0 auto;display:flex;gap:4px;padding:10px 
 .leaflet-container{font-family:'Karla',sans-serif}
 /* ---------- responsive ---------- */
 @media (max-width:960px){
-  .layout{grid-template-columns:1fr;padding:18px 16px 80px}
-  .map-col{position:sticky;top:58px;z-index:900;order:-1;margin:-6px -4px 14px}
-  #map{height:44vh;min-height:300px}
+  .layout{grid-template-columns:1fr;padding:16px 14px 90px}
+  /* map becomes a full-screen overlay toggled by the floating button */
+  .map-col{
+    position:fixed;inset:0;z-index:1500;margin:0;
+    opacity:0;pointer-events:none;transition:opacity .2s;
+    background:var(--paper);
+  }
+  body.map-open .map-col{opacity:1;pointer-events:auto}
+  #map{height:100%;min-height:0;max-height:none;border-radius:0;border:none;box-shadow:none}
   .map-hint{display:none}
-  .sheet{right:0;left:0;top:auto;bottom:0;width:100%;max-height:82vh;border-radius:18px 18px 0 0;
+  .map-fab{display:inline-flex}
+  /* compact header */
+  header{padding:30px 18px 26px}
+  .header-meta{margin-top:12px;gap:5px 18px;font-size:14px}
+  .legend{margin-top:15px;gap:11px 14px;font-size:12.5px}
+  /* compact day tabs */
+  nav.days .wrap{padding:8px 10px}
+  .daytab{font-size:12.5px;padding:6px 10px}
+  /* bottom sheet with drag handle */
+  .sheet{right:0;left:0;top:auto;bottom:0;width:100%;max-height:85vh;border-radius:18px 18px 0 0;
     transform:translateY(104%)}
   .sheet.open{transform:translateY(0)}
-  .stop{grid-template-columns:50px 1fr auto;padding:12px 13px}
+  .sheet .photo{border-radius:18px 18px 0 0}
+  .sheet .handle{
+    position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:6;
+    width:44px;height:5px;border-radius:3px;background:rgba(255,255,255,.8);
+    box-shadow:0 1px 4px rgba(18,32,48,.35);
+  }
+  /* bigger touch targets */
+  .sheet .close{width:42px;height:42px;font-size:19px}
+  .ph-arrow{width:42px;height:42px}
+  .stop{grid-template-columns:48px 1fr auto;gap:10px;padding:12px 13px}
+  .day{scroll-margin-top:72px}
 }
+.sheet .handle{display:none}
+@media (max-width:960px){.sheet .handle{display:block}}
 @media (prefers-reduced-motion:reduce){
   *{transition:none!important;animation:none!important}
   html{scroll-behavior:auto}
@@ -294,6 +332,11 @@ nav.days .wrap{max-width:1180px;margin:0 auto;display:flex;gap:4px;padding:10px 
   </aside>
 </div>
 
+<button class="map-fab" id="map-fab" aria-pressed="false">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg>
+  <span id="map-fab-label">Map</span>
+</button>
+
 <div class="sheet-backdrop" id="backdrop"></div>
 <aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
   <div class="photo">
@@ -303,6 +346,7 @@ nav.days .wrap{max-width:1180px;margin:0 auto;display:flex;gap:4px;padding:10px 
     <button class="ph-arrow next" id="ph-next" aria-label="Next photo" style="display:none">›</button>
     <div class="ph-dots" id="ph-dots" style="display:none"></div>
     <div class="credit" id="sheet-credit" style="display:none">Wikipedia</div>
+    <div class="handle" aria-hidden="true"></div>
     <button class="close" id="sheet-close" aria-label="Close details">✕</button>
   </div>
   <div class="body">
@@ -769,6 +813,29 @@ document.addEventListener('keydown',e=>{
 document.querySelectorAll('.stop').forEach(c=>{
   c.addEventListener('click',()=>selectDest(c.dataset.dest));
 });
+
+/* ============ MOBILE: map overlay toggle ============ */
+const mapFab = document.getElementById('map-fab');
+const mapFabLabel = document.getElementById('map-fab-label');
+mapFab.addEventListener('click',()=>{
+  const open = document.body.classList.toggle('map-open');
+  mapFab.setAttribute('aria-pressed', open);
+  mapFabLabel.textContent = open ? 'Close map' : 'Map';
+  if(open) requestAnimationFrame(()=>map.invalidateSize());
+});
+
+/* ============ MOBILE: swipe down to close the sheet ============ */
+let swY=null, swX=null;
+sheet.addEventListener('touchstart',e=>{
+  if(sheet.scrollTop<=0){ swY=e.touches[0].clientY; swX=e.touches[0].clientX; }
+  else swY=null;
+},{passive:true});
+sheet.addEventListener('touchmove',e=>{
+  if(swY===null) return;
+  const dy=e.touches[0].clientY-swY, dx=e.touches[0].clientX-swX;
+  if(Math.abs(dx)>Math.abs(dy)){ swY=null; return; } /* horizontal = photo swipe */
+  if(dy>80){ swY=null; closeSheet(); }
+},{passive:true});
 </script>
 </body>
 </html>
