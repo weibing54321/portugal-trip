@@ -166,8 +166,42 @@ body.map-open .map-fab{background:var(--paper-2);color:var(--ink)}
 .rt-g:hover{background:var(--rc);color:#fff}
 .rt-day{
   flex-shrink:0;font-size:10.5px;font-weight:700;letter-spacing:.1em;
-  padding:3px 8px;border-radius:6px;color:#fff;background:var(--rc);
+  padding:3px 8px;border-radius:6px;color:#fff;background:var(--rc,var(--neutral));
 }
+.rt-day[data-region="lisbon"]{background:var(--cobalt)}
+.rt-day[data-region="algarve"]{background:var(--ochre)}
+/* route book: legs + embedded Google directions */
+.rb-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:14px;align-items:stretch}
+@media (max-width:820px){.rb-grid{grid-template-columns:minmax(0,1fr)}}
+.rb-list{display:flex;flex-direction:column;gap:6px;max-height:560px;overflow-y:auto;padding-right:2px}
+.rb-leg{
+  display:flex;align-items:center;gap:10px;padding:9px 12px;
+  border:1px solid var(--line);border-radius:10px;background:var(--paper-2);
+  cursor:pointer;font:inherit;color:inherit;text-align:left;
+  transition:border-color .15s,background .15s;
+}
+.rb-leg:hover{border-color:var(--cobalt)}
+.rb-leg.active{border-color:var(--cobalt);background:var(--cobalt-wash);box-shadow:var(--shadow)}
+.rb-leg:focus-visible{outline:3px solid var(--cobalt);outline-offset:2px}
+.rb-txt{display:flex;flex-direction:column;min-width:0}
+.rb-txt strong{font-size:13px;line-height:1.3}
+.rb-mode{font-size:12px;color:var(--ink-soft)}
+.rb-right{display:flex;flex-direction:column;gap:8px}
+.rb-map{
+  position:relative;flex:1;min-height:430px;border:1px solid var(--line);
+  border-radius:12px;overflow:hidden;background:var(--cobalt-wash);
+}
+.rb-map iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.rb-empty{
+  position:absolute;inset:0;display:grid;place-items:center;padding:20px;text-align:center;
+  font-family:'Fraunces',Georgia,serif;font-size:17px;color:var(--cobalt-deep);
+}
+.rb-open{
+  display:block;text-align:center;font-size:13.5px;font-weight:700;color:#fff;
+  background:var(--cobalt);padding:11px 14px;border-radius:10px;text-decoration:none;
+}
+.rb-open:hover{background:var(--cobalt-deep)}
+@media (max-width:820px){.rb-map{min-height:340px}}
 .rt-chain{
   display:flex;align-items:center;margin-top:9px;overflow-x:auto;
   scrollbar-width:none;padding-bottom:2px;
@@ -714,6 +748,33 @@ const ROUTES = {
       {t:"Option B · Zoomarine", mode:"🚐 the van", dur:"~40 min total", g:1, c:["ferragudo","zoomarine","ferragudo"]}],
   d9:[{t:"The home run", mode:"🚐 the van", dur:"~2 h 45 driving", g:1, c:["ferragudo","airport"]}]
 };
+/* real road geometries (precomputed via OSRM) as encoded polylines */
+const ROUTE_GEOM = {
+  "d1-0": "k`ukFlfxv@fAbB}NeK}IcByHd@yJvGsPbe@{FzD|In[pIdKjb@vKbQ~Ilj@tm@xVjh@rLlGvJj@~y@wIdZmP^wSr|@uh@riA{|@`Q`KhCcG`x@ko@xD{Hvb@sLx@jFgDIiCyPwHzBwK`DfArFeGvBJ`Bj`@uJuBgNvD_ABkItEkArC|Q",
+  "d2-0": "qygkFdowv@wK`DfArFoGdDt@dAb]kJnA`GfElCAnFbBbHe@bCdEVx@`Bi@zbAfA|GtJrWhCjPN|o@`EhYnGbHzMp_@pD~RpFhl@|Bhj@sFn@b@rJk@nQ|AhKvAlG_DwRl@eSw@uGArU?lFxCvQ`JaC|A|KpChq@sF`O|Aj@I~AzFwQgB{TxH[j@dFeAuJiH|@mA}WqIkz@cCci@{Fwo@cFaXiOsd@X}A~DSO~BuGR{AeBuDyNaA{LU_k@mB}M}Kq\\g@oEl@qgAsAt@uVaB@aCrNt@?_OyEmD_DuRwHzB",
+  "d3-0": "qygkFdowv@wK`DfArFiInLkcApw@`TtdCmSfvBpZdwAz@lXwzAfpBqw@~d@sG}BzDiBn@hEyZ~fBjIf~@u@jqByDfYyXzl@aUtHyu@xs@oIvxAocAddAmCb`@`MtiBg_@vcAaMvkAy`@dUoIhf@eRnGuKjr@rGbViJlPvCb[z`@ba@qBtW_O|OPwKcMoKvEOYwEkW~MwKeToFbAwJgk@fJ{[mKvDmB}XmK|@uCaKvCsIzUg@tF{a@v]{SnJ}_@xSkA|BrVm@lN{QfGoKlq@nCvMhKbDg@rHhLy@cGpPvCqDlG`DcBwBrN{FgH}a@tKgJrElHaFpB`BrDfAeNsZwVcAgLhS{n@v]cYRgY`Mcq@j_@_dAyLkeBfBab@hdAifAjIuxAzu@ss@bU}H`QiW|I__@jCcbCgIu}@hS{uAzJ_FfD}Lvn@m_@vcAmuAlUmQ|L^{e@ggBgBi`@vRaeBqDob@tLmSb@kj@fR_[tMyh@n]eNvNj@}Jyg@wHzB",
+  "d4-0": "qygkFdowv@wK`DfArFoGjCkOwRpJjDp@wCcI}C_|BsIeEum@iJqN}EaAaCkZmImIkOGmIjCkC}MqGiBgCkPXgn@u\\eKss@nCFu`@pGj@NkM}Jw@cZeANeIKoFCtPcm@wBq@lMbC`t@pGQfAuC`pByJ~YxHdBpDhMqAvN}FrIqXva@dSph@lNlhAxbAuFzLpC}DpHhDfQnRkC`ClBlCSxM~DpTpD}AfFvCeAbHpFQzFjBzDnO_B`GhApFwHzB",
+  "d5-0": "qygkFdowv@_dBzXrv@v~E~yLcz@lqLg`XyZuin@{rB_lKl{@s}SdhHi}ApfNizNrkHwhB~~Ip_AyoEdsIcgAxwUxxC`cQ|cH_{B~|X_uZgUkoM{qB_cEzpJ_|DfsXefe@rcQuoH|oY}fBh{ZqzLv}QdxEpvHos@h}TzhN`hVxZjpX}uIdiBpaFfB~dTmlBzcZxzDp`D",
+  "d6-0": "yqqaF`h_s@mDy@mCaKyAg^eGs\\vKePxIgBfNuSTiOpLeYnAsKvUjAhIzHl@kLlDsGu@cJq^}aAqOip@iEmd@bd@aa@|Ry[cJuYdK_a@`XAtr@uVhc@ahAzTiLRyDzFcEgEGgCwR}P}XgQxA{MwBpn@eh@ca@|YyEhJkF~@eRmPsPeBkC}DkIP}aCp]iI|FzAjDxBh{@aZldByEto@kLdVzAhCcJpSMxg@cIbNwMhKmNtk@yDnEA`UcHxZrCh`@oAne@`QrTrFfOnRsBxPlIRzLzGdS~a@nYzNgDThEfAyF|C~RfE~A",
+  "d7-0": "yqqaF`h_s@uJeV_FhZsx@}Bwe@zuAo\\~@{Fva@exBi}@uo@zHaXk[~P|kGoo@`rCn}@d{E~YhrEzd@ttB|yBhrDjDps@bd@cAp^ak@lnCyzAxC`sAf_AxxDsMpm@`Dhp@zq@x_DcKb_EzOp`AxbAzhA~Ezl@~Xre@sDhb@}w@j_BtMlyAn@z|Cb}AlrA~gAxDpj@nb@~cHrvBcj@sTgIhVwoB|{AsCl~Bf^llAg^mlAfCm}B|{B_tBmzFgaBqj@ob@qiAsE_hAkv@yWwi@zBikCqMm}A|y@ebB`Cwa@uYma@qAoh@mjAcvAsQs|AlQ{rCus@ciDvHy_Bg~@asDgEaaAzCwVxg@iLbHuvAd\\yc@~xA{`@slBbU}LfOaG}IiPfDjEuMij@l]cyAo\\c{@qt@oeAiTqnAi|Cdf@m_BmVkiA}e@m}@TmoFxU}m@bBwz@|Pg[by@jP\\m`@hf@yN`YkeAly@X~EiZtJdV",
+  "d8-0": "yqqaF`h_s@mDy@mCaKyAg^mFcYcWlDkZa@mAoHwOmIiMtBoDwAaX{c@km@{h@kCiHeAqXxLwl@pLmNfa@_T`Sm^vGaEwMqZcRqz@wFkLq[gOm]aFkmA{n@ov@vFyIaAmb@s[oN_SsJtCmN{MnBvFsBlDjHdIaJuDrDlF{FjHnAM`DhMrIeESbE|@aIhIiA{HkRvHwDtQpTf`@|YdL|@pt@cGdnA`p@xh@nJ~NdJvFhLtOnt@dHxQ^pJwGpU{InNce@xWyKdOoKjj@zAf]}@fGvJRl_@x^fSdVlJvTnRsBxPlIRzLnGtRpJ~D~HbKhNbHjMoDThEfAyF|C~RfE~A",
+  "d8-1": "yqqaF`h_s@{H{LgIkx@or@jCmAoHwOmIyR\\aX{c@an@qi@sEeWrPk{@vk@y^x[od@ee@y~Ay_@qUyM_}BhKod@pw@}~@hQkg@dCec@uDex@`Hkq@}N}y@Coa@|Z}hAlNrBvLedAfZcJbQmRkDcwCsSmSnQrNhAtQvCviCgL|Maa@lNsLd}@cSmGnDrByA`PeWl_A?na@~N|y@mH`u@`Ett@cCzb@sQzg@iw@j~@kKld@bJtlBkGpQ~[xEpNvLv^j|AsR`e@co@dc@aOdy@bAr\\hJOl_@x^l^rk@vRiBxPlInH`a@~a@nYzNgDThEfAyFdJ~U",
+  "d9-0": "yqqaF`h_s@i|DszDfzAqcCouAoiFziBy~MkBeaTumBgjFulXl}IkgVsZ{|TaiNgbIlq@qlOa_Fqv]xiMqy^n{CigMpwHuoZxof@s{JthBmrZy|E}tO`|GahMniNadHh}Ays@dsSzeBbtWi}Xj~Iu}@nzM}}IzpOil@nrFtsD`eEigB{e@",
+};
+function decodePolyline(str){
+  const pts=[]; let i=0, lat=0, lng=0;
+  while(i<str.length){
+    for(const ref of [0,1]){
+      let sh=0, res=0, b;
+      do{ b=str.charCodeAt(i++)-63; res|=(b&0x1f)<<sh; sh+=5; }while(b>=0x20);
+      const d=(res&1)?~(res>>1):(res>>1);
+      if(ref===0) lat+=d; else lng+=d;
+    }
+    pts.push([lat/1e5,lng/1e5]);
+  }
+  return pts;
+}
+
 /* Google link only where we actually drive (the van days) */
 function gmapsUrl(ids){
   const pts = ids.map(i=>DEST[i].lat+','+DEST[i].lng);
@@ -965,11 +1026,66 @@ DAYS.forEach((day,di)=>{
 /* all-routes panel */
 const routesPanel = document.createElement('section');
 routesPanel.className='panel';
+const RB_LEGS = [
+  {d:1, n:"LIS Airport → Hotel", mode:"🚕 pre-booked transfer", dur:"~20 min", flg:"d", c:["airport","stayLisbon"]},
+  {d:2, n:"Hotel → Belém", mode:"🚋 tram 15E", dur:"~25 min", flg:"r", c:["stayLisbon","jeronimos"]},
+  {d:2, n:"Belém → Hotel", mode:"🚋 tram 15E", dur:"~25 min", flg:"r", c:["torre","stayLisbon"]},
+  {d:3, n:"Hotel → Quinta da Regaleira", mode:"🚆 train from Rossio", dur:"~55 min", flg:"r", c:["stayLisbon","regaleira"]},
+  {d:3, n:"Regaleira → Pena Palace", mode:"🚌 shuttle / tuk-tuk", dur:"~15 min", flg:"d", c:["regaleira","pena"]},
+  {d:3, n:"Pena → Hotel", mode:"🚆 train via Sintra station", dur:"~1 h 10", flg:"r", c:["pena","stayLisbon"]},
+  {d:4, n:"Hotel → Oceanário", mode:"🚇 metro via Alameda", dur:"~25 min", flg:"r", c:["stayLisbon","oceanario"]},
+  {d:4, n:"Parque das Nações → Alfama", mode:"🚇 metro", dur:"~25 min", flg:"r", c:["telecabine","alfama"]},
+  {d:5, n:"Hotel → Sixt van pickup", mode:"🚕 two Ubers", dur:"~10 min", flg:"d", c:["stayLisbon","sixt"]},
+  {d:5, n:"Sixt → Comporta → Villa", mode:"🚐 the van, A2 south", dur:"~2 h 45", flg:"d", c:["sixt","comporta","ferragudo"]},
+  {d:6, n:"Villa → Benagil → Marinha → Villa", mode:"🚐 the van", dur:"~40 min total", flg:"d", c:["ferragudo","benagil","marinha","ferragudo"]},
+  {d:7, n:"Villa → Sagres → Cabo → Piedade → Lagos → Villa", mode:"🚐 the van", dur:"~2 h 10 total", flg:"d", c:["ferragudo","sagres","cabosv","piedade","lagos","ferragudo"]},
+  {d:8, n:"Villa → Silves → Villa (Option A)", mode:"🚐 the van", dur:"~50 min total", flg:"d", c:["ferragudo","silves","ferragudo"]},
+  {d:8, n:"Villa → Zoomarine → Villa (Option B)", mode:"🚐 the van", dur:"~40 min total", flg:"d", c:["ferragudo","zoomarine","ferragudo"]},
+  {d:9, n:"Villa → LIS Airport", mode:"🚐 the van, van back 14:00", dur:"~2 h 45", flg:"d", c:["ferragudo","airport"]}
+];
+function embedUrl(leg){
+  const pts = leg.c.map(i=>DEST[i].lat+','+DEST[i].lng);
+  return 'https://maps.google.com/maps?saddr='+pts[0]+'&daddr='+pts.slice(1).join('+to:')
+    +'&dirflg='+leg.flg+'&output=embed&hl=en';
+}
+function legGmapsUrl(leg){
+  const pts = leg.c.map(i=>DEST[i].lat+','+DEST[i].lng);
+  const wp = pts.slice(1,-1).join('|');
+  return 'https://www.google.com/maps/dir/?api=1&origin='+pts[0]+'&destination='+pts[pts.length-1]
+    +(wp?'&waypoints='+encodeURIComponent(wp):'')
+    +'&travelmode='+(leg.flg==='r'?'transit':'driving');
+}
 routesPanel.innerHTML = `
-  <h2>All the routes</h2>
-  <p class="sub">Tap any route to see it drawn on the trip map, day pins highlighted. Van days also carry a Google link for actual navigation.</p>
-  ${DAYS.map((day,di)=>(ROUTES[day.id]||[]).map((r,ri)=>routeHtml(di,ri,r,true)).join('')).join('')}`;
+  <h2>The trip on Google Maps</h2>
+  <p class="sub">Every leg of the trip, with its real transport mode. Pick a leg — the map loads Google's actual directions for it.</p>
+  <div class="rb-grid">
+    <div class="rb-list" id="rb-list">
+      ${RB_LEGS.map((leg,i)=>`
+        <button class="rb-leg" type="button" data-leg="${i}">
+          <span class="rt-day" data-region="${DAYS[leg.d-1].region}">D${leg.d}</span>
+          <span class="rb-txt"><strong>${leg.n}</strong><span class="rb-mode">${leg.mode} · ${leg.dur}</span></span>
+        </button>`).join('')}
+    </div>
+    <div class="rb-right">
+      <div class="rb-map" id="rb-map">
+        <div class="rb-empty" id="rb-empty">← Pick a leg to load its route</div>
+      </div>
+      <a class="rb-open" id="rb-open" href="#" target="_blank" rel="noopener" style="display:none">Open this route in the Google Maps app ↗</a>
+    </div>
+  </div>`;
 itin.appendChild(routesPanel);
+const rbMap = document.getElementById('rb-map');
+const rbOpen = document.getElementById('rb-open');
+document.getElementById('rb-list').addEventListener('click',e=>{
+  const btn = e.target.closest('.rb-leg');
+  if(!btn) return;
+  const leg = RB_LEGS[+btn.dataset.leg];
+  document.querySelectorAll('.rb-leg').forEach(b=>b.classList.toggle('active', b===btn));
+  rbMap.innerHTML = `<iframe src="${embedUrl(leg)}" loading="lazy" title="Route: ${leg.n}" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>`;
+  rbOpen.href = legGmapsUrl(leg);
+  rbOpen.style.display='block';
+  if(window.matchMedia('(max-width:820px)').matches) rbMap.scrollIntoView({behavior:'smooth',block:'center'});
+});
 
 /* route blocks: clicking shows the route on the page's own map */
 document.addEventListener('click',e=>{
@@ -1011,9 +1127,11 @@ function drawRoute(di, ri){
   const day = DAYS[di];
   const r = ROUTES[day.id];
   if(!r || !r.length) return;
-  const pts = r[ri||0].c.map(id=>[DEST[id].lat,DEST[id].lng]);
+  const key = day.id+'-'+(ri||0);
+  const geom = ROUTE_GEOM[key];
+  const pts = geom ? decodePolyline(geom) : r[ri||0].c.map(id=>[DEST[id].lat,DEST[id].lng]);
   const col = day.region==='lisbon' ? '#1E4E8C' : day.region==='algarve' ? '#C2702E' : '#6B7280';
-  routeLine = L.polyline(pts,{color:col,weight:3.5,dashArray:'2 9',lineCap:'round',opacity:.85}).addTo(map);
+  routeLine = L.polyline(pts,{color:col,weight:4,lineCap:'round',opacity:.8}).addTo(map);
 }
 
 function activateDay(di, flyTo, ri){
