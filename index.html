@@ -192,10 +192,12 @@ body.map-open .map-fab{background:var(--paper-2);color:var(--ink)}
   border-radius:12px;overflow:hidden;background:var(--cobalt-wash);
 }
 .rb-map iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-.rb-empty{
-  position:absolute;inset:0;display:grid;place-items:center;padding:20px;text-align:center;
-  font-family:'Fraunces',Georgia,serif;font-size:17px;color:var(--cobalt-deep);
+.rb-steps{
+  border:1px solid var(--line);border-radius:12px;background:#fff;
+  padding:6px 12px;max-height:340px;overflow-y:auto;font-size:13.5px;
 }
+.rb-steps img{max-width:100%}
+.rb-steps table{width:100%}
 .rb-open{
   display:block;text-align:center;font-size:13.5px;font-weight:700;color:#fff;
   background:var(--cobalt);padding:11px 14px;border-radius:10px;text-decoration:none;
@@ -1043,6 +1045,14 @@ const RB_LEGS = [
   {d:8, n:"Villa → Zoomarine → Villa (Option B)", mode:"🚐 the van", dur:"~40 min total", flg:"d", c:["ferragudo","zoomarine","ferragudo"]},
   {d:9, n:"Villa → LIS Airport", mode:"🚐 the van, van back 14:00", dur:"~2 h 45", flg:"d", c:["ferragudo","airport"]}
 ];
+/* ====== GOOGLE MAPS API KEY ======
+   Paste your key between the quotes to upgrade the route book to the full
+   Google Maps directions experience (interactive map + Google's own
+   step-by-step panel with bus/tram/metro lines). Get one free at
+   console.cloud.google.com → enable "Maps JavaScript API" — restrict the
+   key to this site's domain. With no key, the simple embed below is used. */
+const GMAPS_KEY = "";
+
 function embedUrl(leg){
   const pts = leg.c.map(i=>DEST[i].lat+','+DEST[i].lng);
   return 'https://maps.google.com/maps?saddr='+pts[0]+'&daddr='+pts.slice(1).join('+to:')
@@ -1057,7 +1067,7 @@ function legGmapsUrl(leg){
 }
 routesPanel.innerHTML = `
   <h2>The trip on Google Maps</h2>
-  <p class="sub">Every leg of the trip, with its real transport mode. Pick a leg — the map loads Google's actual directions for it.</p>
+  <p class="sub">Every leg of the trip. Pick one — Google Maps shows the route${GMAPS_KEY?' and the step-by-step directions':''}.</p>
   <div class="rb-grid">
     <div class="rb-list" id="rb-list">
       ${RB_LEGS.map((leg,i)=>`
@@ -1067,25 +1077,60 @@ routesPanel.innerHTML = `
         </button>`).join('')}
     </div>
     <div class="rb-right">
-      <div class="rb-map" id="rb-map">
-        <div class="rb-empty" id="rb-empty">← Pick a leg to load its route</div>
-      </div>
+      <div class="rb-map" id="rb-map"></div>
+      <div class="rb-steps" id="rb-steps" style="display:none"></div>
       <a class="rb-open" id="rb-open" href="#" target="_blank" rel="noopener" style="display:none">Open this route in the Google Maps app ↗</a>
     </div>
   </div>`;
 itin.appendChild(routesPanel);
 const rbMap = document.getElementById('rb-map');
+const rbSteps = document.getElementById('rb-steps');
 const rbOpen = document.getElementById('rb-open');
+
+/* Full Google Maps mode (needs GMAPS_KEY): interactive map + Google's own
+   directions panel — the same step list, transit lines included. */
+let gMap=null, gDirSvc=null, gDirRen=null;
+window.initRB = function(){
+  gMap = new google.maps.Map(rbMap,{center:{lat:38.0,lng:-8.9},zoom:7,mapTypeControl:false,streetViewControl:false});
+  gDirSvc = new google.maps.DirectionsService();
+  gDirRen = new google.maps.DirectionsRenderer({map:gMap,panel:rbSteps});
+  const active = document.querySelector('.rb-leg.active');
+  if(active) showLeg(+active.dataset.leg);
+};
+if(GMAPS_KEY){
+  const s = document.createElement('script');
+  s.src = 'https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(GMAPS_KEY)+'&callback=initRB';
+  s.async = true;
+  document.head.appendChild(s);
+}
+
+function showLeg(i){
+  const leg = RB_LEGS[i];
+  document.querySelectorAll('.rb-leg').forEach((b,k)=>b.classList.toggle('active', k===i));
+  rbOpen.href = legGmapsUrl(leg);
+  rbOpen.style.display='block';
+  if(GMAPS_KEY && gDirSvc){
+    const pts = leg.c.map(id=>({lat:DEST[id].lat,lng:DEST[id].lng}));
+    rbSteps.style.display='block';
+    gDirSvc.route({
+      origin:pts[0], destination:pts[pts.length-1],
+      waypoints:pts.slice(1,-1).map(p=>({location:p,stopover:true})),
+      travelMode: leg.flg==='r' ? google.maps.TravelMode.TRANSIT : google.maps.TravelMode.DRIVING
+    },(res,status)=>{
+      if(status==='OK'){ gDirRen.setDirections(res); }
+      else{ rbSteps.textContent = "Google couldn't route this leg here — the button below opens it in the app."; }
+    });
+  }else{
+    rbMap.innerHTML = `<iframe src="${embedUrl(leg)}" loading="lazy" title="Route: ${leg.n}" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>`;
+  }
+}
 document.getElementById('rb-list').addEventListener('click',e=>{
   const btn = e.target.closest('.rb-leg');
   if(!btn) return;
-  const leg = RB_LEGS[+btn.dataset.leg];
-  document.querySelectorAll('.rb-leg').forEach(b=>b.classList.toggle('active', b===btn));
-  rbMap.innerHTML = `<iframe src="${embedUrl(leg)}" loading="lazy" title="Route: ${leg.n}" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>`;
-  rbOpen.href = legGmapsUrl(leg);
-  rbOpen.style.display='block';
+  showLeg(+btn.dataset.leg);
   if(window.matchMedia('(max-width:820px)').matches) rbMap.scrollIntoView({behavior:'smooth',block:'center'});
 });
+showLeg(0); /* the map is live from the start */
 
 /* route blocks: clicking shows the route on the page's own map */
 document.addEventListener('click',e=>{
