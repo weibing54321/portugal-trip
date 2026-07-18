@@ -141,6 +141,28 @@ body.map-open .map-fab{background:var(--paper-2);color:var(--ink)}
   background:transparent;border-left:3px solid var(--line);
   padding:6px 14px;font-size:13.5px;color:var(--ink-soft);margin-top:4px;
 }
+/* route rows */
+.route-row{
+  display:flex;align-items:center;gap:11px;margin-top:9px;padding:10px 14px;
+  border:1.5px dashed var(--line);border-radius:11px;background:transparent;
+  text-decoration:none;color:inherit;font-size:13.5px;
+  transition:border-color .15s,background .15s;
+}
+.route-row:hover{border-color:var(--cobalt);background:var(--paper-2)}
+.route-row:focus-visible{outline:3px solid var(--cobalt);outline-offset:2px}
+.route-ico{font-size:16px;flex-shrink:0}
+.route-day{
+  flex-shrink:0;font-size:10.5px;font-weight:700;letter-spacing:.1em;
+  padding:4px 8px;border-radius:6px;color:#fff;background:var(--neutral);
+}
+.route-day[data-region="lisbon"]{background:var(--cobalt)}
+.route-day[data-region="algarve"]{background:var(--ochre)}
+.route-txt{display:flex;flex-direction:column;min-width:0}
+.route-txt strong{font-size:13px}
+.route-chain{color:var(--ink-soft);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.route-dur{margin-left:auto;color:var(--ink-soft);font-size:12px;white-space:nowrap;flex-shrink:0}
+.route-open{color:var(--cobalt);font-weight:700;font-size:12.5px;white-space:nowrap;flex-shrink:0}
+@media (max-width:700px){.route-dur{display:none}}
 .note strong{color:var(--ink)}
 /* checklist + practical */
 .panel{
@@ -658,6 +680,44 @@ const DAYS = [
    note:"Oct 5 is Republic Day (national holiday) — expect a busier-than-usual Sunday on the A2 and at LIS. Fuel before the airport (full-to-full), drop the van at 14:00, check-in, then the non-Schengen exit."}
 ];
 
+/* ============ ROUTES ============ */
+const SHORT = {
+  stayLisbon:"Hotel (Baixa)", ferragudo:"Villa (Ferragudo)", airport:"LIS", sixt:"Sixt",
+  praca:"Pç. Comércio", jeronimos:"Jerónimos", pasteis:"Pastéis", torre:"Torre de Belém",
+  regaleira:"Regaleira", pena:"Pena", oceanario:"Oceanário", telecabine:"Telecabine",
+  alfama:"Alfama", comporta:"Comporta", benagil:"Benagil boats", marinha:"Marinha",
+  sagres:"Sagres", cabosv:"Cabo S. Vicente", piedade:"Piedade", lagos:"Lagos",
+  silves:"Silves", zoomarine:"Zoomarine"
+};
+const ROUTES = {
+  d1:[{t:"Arrival transfer", dur:"~20 min + a stroll", c:["airport","stayLisbon","praca"]}],
+  d2:[{t:"Belém loop", dur:"tram 15E · ~20 min each way", c:["stayLisbon","jeronimos","pasteis","torre","stayLisbon"]}],
+  d3:[{t:"Sintra day", dur:"train from Rossio · ~40 min", c:["stayLisbon","regaleira","pena","stayLisbon"]}],
+  d4:[{t:"Aquarium + Alfama", dur:"metro + walking", c:["stayLisbon","oceanario","telecabine","alfama","stayLisbon"]}],
+  d5:[{t:"The drive south", dur:"~2 h 45 driving", c:["stayLisbon","sixt","comporta","ferragudo"]}],
+  d6:[{t:"Boats & cliffs", dur:"~40 min driving total", c:["ferragudo","benagil","marinha","ferragudo"]}],
+  d7:[{t:"The west day", dur:"~2 h 10 driving total", c:["ferragudo","sagres","cabosv","piedade","lagos","ferragudo"]}],
+  d8:[{t:"Option A · Silves", dur:"~50 min total", c:["ferragudo","silves","ferragudo"]},
+      {t:"Option B · Zoomarine", dur:"~40 min total", c:["ferragudo","zoomarine","ferragudo"]}],
+  d9:[{t:"The home run", dur:"~2 h 45 driving", c:["ferragudo","airport"]}]
+};
+function gmapsUrl(ids){
+  const pts = ids.map(i=>DEST[i].lat+','+DEST[i].lng);
+  const wp = pts.slice(1,-1).join('|');
+  return 'https://www.google.com/maps/dir/?api=1'
+    +'&origin='+pts[0]+'&destination='+pts[pts.length-1]
+    +(wp?'&waypoints='+encodeURIComponent(wp):'')+'&travelmode=driving';
+}
+function routeRowHtml(r, dayBadge){
+  return `<a class="route-row" href="${gmapsUrl(r.c)}" target="_blank" rel="noopener">
+    ${dayBadge||'<span class="route-ico">🗺</span>'}
+    <span class="route-txt"><strong>${r.t}</strong>
+      <span class="route-chain">${r.c.map(i=>SHORT[i]||DEST[i].name).join(' → ')}</span></span>
+    <span class="route-dur">${r.dur||''}</span>
+    <span class="route-open">Maps ↗</span>
+  </a>`;
+}
+
 /* ============ MAP ============ */
 const map = L.map('map',{scrollWheelZoom:true,zoomControl:true});
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
@@ -868,13 +928,26 @@ DAYS.forEach((day,di)=>{
       <span class="chev">›</span>
     </button>`;
   }).join('');
+  const routesHtml = (ROUTES[day.id]||[]).map(r=>routeRowHtml(r)).join('');
   sec.innerHTML = `
     <div class="day-head"><span class="dnum">Day ${di+1} · ${day.num}</span><h2>${day.title}</h2></div>
     <p class="day-sub">${day.sub}</p>
     <div class="stops">${stopsHtml}</div>
+    ${routesHtml}
     ${day.note?`<p class="note">${day.note}</p>`:''}`;
   itin.appendChild(sec);
 });
+
+/* all-routes panel */
+const routesPanel = document.createElement('section');
+routesPanel.className='panel';
+routesPanel.innerHTML = `
+  <h2>All the routes</h2>
+  <p class="sub">Every day's route, plotted — tap to open in Google Maps. Links show the driving line; in Lisbon we're really on the tram, train and metro, so read those as the shape of the day.</p>
+  ${DAYS.map((day,di)=>(ROUTES[day.id]||[]).map(r=>
+    routeRowHtml(r, `<span class="route-day" data-region="${day.region}">D${di+1}</span>`)
+  ).join('')).join('')}`;
+itin.appendChild(routesPanel);
 
 /* practical footer panel */
 const prac = document.createElement('section');
@@ -894,9 +967,22 @@ itin.appendChild(prac);
 let currentDay = null;
 let selectedDest = null;
 
+let routeLine = null;
+function drawRoute(di){
+  if(routeLine){ routeLine.remove(); routeLine=null; }
+  if(di===null) return;
+  const day = DAYS[di];
+  const r = ROUTES[day.id];
+  if(!r || !r.length) return;
+  const pts = r[0].c.map(id=>[DEST[id].lat,DEST[id].lng]);
+  const col = day.region==='lisbon' ? '#1E4E8C' : day.region==='algarve' ? '#C2702E' : '#6B7280';
+  routeLine = L.polyline(pts,{color:col,weight:3,dashArray:'6 9',opacity:.7}).addTo(map);
+}
+
 function activateDay(di, flyTo){
   currentDay = di;
   document.querySelectorAll('.daytab').forEach((t,i)=>t.classList.toggle('active', i===(di===null?0:di+1)));
+  drawRoute(di);
   if(di===null){
     setMarkerState(null, selectedDest);
     fitAll();
@@ -906,6 +992,7 @@ function activateDay(di, flyTo){
     setMarkerState(ids, selectedDest);
     if(flyTo){
       const pts = day.stops.map(s=>[DEST[s.d].lat,DEST[s.d].lng]);
+      if(ROUTES[day.id]) ROUTES[day.id][0].c.forEach(id=>pts.push([DEST[id].lat,DEST[id].lng]));
       if(pts.length===1) map.flyTo(pts[0], 12, {duration:.8});
       else map.flyToBounds(L.latLngBounds(pts),{padding:[46,46],duration:.8});
     }
