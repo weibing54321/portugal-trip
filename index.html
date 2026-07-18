@@ -694,12 +694,20 @@ const RB_LEGS = [
   {d:3, pos:1,  n:"Pena → Hotel", mode:"🚆 train via Sintra station", dur:"~1 h 10", flg:"r", c:["pena","stayLisbon"]},
   {d:4, pos:-1, n:"Hotel → Oceanário", mode:"🚇 metro via Alameda", dur:"~25 min", flg:"r", c:["stayLisbon","oceanario"]},
   {d:4, pos:1,  n:"Parque das Nações → Alfama", mode:"🚇 metro", dur:"~25 min", flg:"r", c:["telecabine","alfama"]},
+  {d:4, pos:2,  n:"Alfama → Hotel", mode:"🚶 downhill walk", dur:"~12 min", flg:"w", c:["alfama","stayLisbon"]},
   {d:5, pos:-1, n:"Hotel → Sixt van pickup", mode:"🚕 two Ubers", dur:"~10 min", flg:"d", c:["stayLisbon","sixt"]},
   {d:5, pos:0,  n:"Sixt → Comporta → Villa", mode:"🚐 the van, A2 south", dur:"~2 h 45", flg:"d", c:["sixt","comporta","ferragudo"]},
-  {d:6, pos:-1, n:"Villa → Benagil → Marinha → Villa", mode:"🚐 the van", dur:"~40 min total", flg:"d", c:["ferragudo","benagil","marinha","ferragudo"]},
-  {d:7, pos:-1, n:"Villa → Sagres → Cabo → Piedade → Lagos → Villa", mode:"🚐 the van", dur:"~2 h 10 total", flg:"d", c:["ferragudo","sagres","cabosv","piedade","lagos","ferragudo"]},
-  {d:8, pos:0,  n:"Villa → Silves → Villa (Option A)", mode:"🚐 the van", dur:"~50 min total", flg:"d", c:["ferragudo","silves","ferragudo"]},
-  {d:8, pos:1,  n:"Villa → Zoomarine → Villa (Option B)", mode:"🚐 the van", dur:"~40 min total", flg:"d", c:["ferragudo","zoomarine","ferragudo"]},
+  {d:6, pos:-1, n:"Villa → Benagil boats", mode:"🚐 the van", dur:"~15 min", flg:"d", c:["ferragudo","benagil"]},
+  {d:6, pos:0,  n:"Benagil → Praia da Marinha", mode:"🚐 the van", dur:"~10 min", flg:"d", c:["benagil","marinha"]},
+  {d:6, pos:1,  n:"Marinha → Villa", mode:"🚐 the van", dur:"~15 min", flg:"d", c:["marinha","ferragudo"]},
+  {d:7, pos:-1, n:"Villa → Sagres", mode:"🚐 the van", dur:"~55 min", flg:"d", c:["ferragudo","sagres"]},
+  {d:7, pos:0,  n:"Sagres → Cabo de São Vicente", mode:"🚐 the van", dur:"~10 min", flg:"d", c:["sagres","cabosv"]},
+  {d:7, pos:1,  n:"Cabo → Ponta da Piedade", mode:"🚐 the van", dur:"~50 min", flg:"d", c:["cabosv","piedade"]},
+  {d:7, pos:3,  n:"Lagos → Villa", mode:"🚐 the van", dur:"~40 min", flg:"d", c:["lagos","ferragudo"]},
+  {d:8, pos:-1, n:"Villa → Silves (Option A)", mode:"🚐 the van", dur:"~25 min", flg:"d", c:["ferragudo","silves"]},
+  {d:8, pos:0,  n:"Silves → Villa (Option A)", mode:"🚐 the van", dur:"~25 min", flg:"d", c:["silves","ferragudo"]},
+  {d:8, pos:0,  n:"Villa → Zoomarine (Option B)", mode:"🚐 the van", dur:"~20 min", flg:"d", c:["ferragudo","zoomarine"]},
+  {d:8, pos:1,  n:"Zoomarine → Villa (Option B)", mode:"🚐 the van", dur:"~20 min", flg:"d", c:["zoomarine","ferragudo"]},
   {d:9, pos:-1, n:"Villa → LIS Airport", mode:"🚐 the van, van back 14:00", dur:"~2 h 45", flg:"d", c:["ferragudo","airport"]}
 ];
 function legGmapsUrl(leg){
@@ -707,7 +715,7 @@ function legGmapsUrl(leg){
   const wp = pts.slice(1,-1).join('|');
   return 'https://www.google.com/maps/dir/?api=1&origin='+pts[0]+'&destination='+pts[pts.length-1]
     +(wp?'&waypoints='+encodeURIComponent(wp):'')
-    +'&travelmode='+(leg.flg==='r'?'transit':'driving');
+    +'&travelmode='+(leg.flg==='r'?'transit':leg.flg==='w'?'walking':'driving');
 }
 function legHtml(i, leg){
   return `<button class="rb-leg" type="button" data-leg="${i}" data-region="${DAYS[leg.d-1].region}">
@@ -849,7 +857,7 @@ async function mapShowLegRoute(leg){
       origin:{lat:pts[0][0],lng:pts[0][1]},
       destination:{lat:pts[pts.length-1][0],lng:pts[pts.length-1][1]},
       waypoints:pts.slice(1,-1).map(p=>({location:{lat:p[0],lng:p[1]},stopover:true})),
-      travelMode: leg.flg==='r' ? google.maps.TravelMode.TRANSIT : google.maps.TravelMode.DRIVING
+      travelMode: leg.flg==='r' ? google.maps.TravelMode.TRANSIT : leg.flg==='w' ? google.maps.TravelMode.WALKING : google.maps.TravelMode.DRIVING
     },(res,status)=>{
       if(status==='OK'){ gDirRen.setDirections(res); }
       else{ gDirRen.setMap(null); mapDrawPolyline(pts,'#4285F4'); mapFitPts(pts); }
