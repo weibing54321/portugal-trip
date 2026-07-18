@@ -62,7 +62,7 @@ header h1 em{font-style:italic;color:#E8B36A}
 .legend{margin-top:22px;display:flex;gap:16px;flex-wrap:wrap;font-size:13px}
 .legend span{display:inline-flex;align-items:center;gap:7px;color:#DCE6F2}
 .dot{width:11px;height:11px;border-radius:50%;display:inline-block;box-shadow:0 0 0 2px rgba(255,255,255,.35)}
-.dot.lis{background:#5B8FD4}.dot.alg{background:#E09550}.dot.tra{background:#9AA3AD}
+.dot.lis{background:#5B8FD4}.dot.alg{background:#E09550}.dot.tra{background:#9AA3AD}.dot.stay{background:#4C9A63}
 /* ---------- day tabs ---------- */
 nav.days{
   position:sticky;top:0;z-index:1000;
@@ -156,8 +156,53 @@ body.map-open .map-fab{background:var(--paper-2);color:var(--ink)}
   font-size:12px;font-weight:700;display:grid;place-items:center;margin-top:1px;
 }
 .check li.hot .n{background:#A33B2A}
+.check li.done .n{background:#2E7D46}
 .check strong{font-weight:700}
 .check .why{color:var(--ink-soft)}
+/* ---------- stays ---------- */
+.stay-card{
+  background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;
+  margin-bottom:14px;cursor:pointer;transition:transform .15s,box-shadow .15s;
+  padding-bottom:16px;
+}
+.stay-card:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+.stay-card:focus-visible{outline:3px solid var(--cobalt);outline-offset:2px}
+.stay-strip{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;background:var(--cobalt-wash)}
+.stay-strip::-webkit-scrollbar{display:none}
+.stay-strip img{height:130px;aspect-ratio:4/3;flex:0 0 auto;object-fit:cover;display:block}
+.stay-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 16px 2px}
+.stay-badge{
+  font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  padding:4px 9px;border-radius:6px;color:#fff;flex-shrink:0;
+}
+.stay-badge.booked{background:#2E7D46}
+.stay-badge.opta{background:var(--ochre)}
+.stay-badge.optb{background:var(--cobalt)}
+.stay-head h3{font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:20px;letter-spacing:-.01em}
+.stay-where{width:100%;font-size:12.5px;color:var(--ink-soft)}
+.stay-facts{list-style:none;padding:8px 16px 0;display:flex;flex-direction:column;gap:4px;font-size:13.5px;color:var(--ink-soft)}
+.stay-facts li{padding-left:15px;position:relative}
+.stay-facts li::before{content:'·';position:absolute;left:2px;font-weight:800;color:var(--ink)}
+.stay-facts strong{color:var(--ink)}
+.pc{padding:10px 16px 0;font-size:13px;display:flex;flex-direction:column;gap:3px}
+.pc span{display:block;padding-left:17px;position:relative}
+.pc .p::before{content:'+';position:absolute;left:0;color:#2E7D46;font-weight:800}
+.pc .c::before{content:'–';position:absolute;left:0;color:#A33B2A;font-weight:800}
+.stay-more{font-size:13px;font-weight:700;color:var(--cobalt);padding:12px 16px 0}
+.stay-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+@media (max-width:700px){.stay-grid{grid-template-columns:1fr}}
+.vote-callout{
+  background:var(--ochre-wash);border-left:3px solid var(--ochre);
+  padding:12px 15px;border-radius:0 10px 10px 0;font-size:14px;margin-bottom:14px;
+}
+.pin.stay{background:#2E7D46}
+.region-tag.stay{background:#2E7D46}
+.ph-slide{position:relative}
+.ph-cap{
+  position:absolute;left:10px;bottom:34px;z-index:4;
+  background:rgba(18,32,48,.62);color:#fff;font-size:12px;line-height:1.35;
+  padding:4px 10px;border-radius:8px;max-width:78%;
+}
 /* ---------- detail sheet ---------- */
 .sheet-backdrop{
   position:fixed;inset:0;background:rgba(18,32,48,.45);z-index:2000;
@@ -257,7 +302,7 @@ body.map-open .map-fab{background:var(--paper-2);color:var(--ink)}
 .leaflet-container{font-family:'Karla',sans-serif}
 /* ---------- responsive ---------- */
 @media (max-width:960px){
-  .layout{grid-template-columns:1fr;padding:16px 14px 90px}
+  .layout{grid-template-columns:minmax(0,1fr);padding:16px 14px 90px}
   /* map becomes a full-screen overlay toggled by the floating button */
   .map-col{
     position:fixed;inset:0;z-index:1500;margin:0;
@@ -308,13 +353,14 @@ body.map-open .map-fab{background:var(--paper-2);color:var(--ink)}
     <h1>Lisbon &amp; the <em>Algarve</em>,<br>eight of us.</h1>
     <div class="header-meta">
       <span><strong>6 adults</strong> + kids <strong>4 &amp; 7</strong></span>
-      <span>Lisbon <strong>4 nights</strong> · Ferragudo/Carvoeiro <strong>4 nights</strong></span>
+      <span>Lisbon <strong>4 nights</strong> · Algarve <strong>4 nights</strong></span>
       <span>8-seat van from <strong>30 Sept</strong>, drop at LIS</span>
     </div>
     <div class="legend">
       <span><i class="dot lis"></i>Lisbon &amp; Sintra</span>
       <span><i class="dot alg"></i>Algarve</span>
       <span><i class="dot tra"></i>Transfer</span>
+      <span><i class="dot stay"></i>Where we sleep</span>
       <span style="opacity:.8">Tap any stop or pin for photos &amp; details</span>
     </div>
   </div>
@@ -416,7 +462,7 @@ const DEST = {
     wiki:["Ferragudo"],
     desc:"A working fishing village on the Arade estuary that kept its soul — whitewashed lanes tumbling to a palm-lined square, small boats, a castle across the water. Your base for the Algarve half.",
     kid:"The village square is full of relaxed restaurants; Praia Grande beach is a flat 10-minute walk. Big grocery run in Lagoa or Portimão on arrival day.",
-    book:"Villa with pool, sleeps 8 — book immediately, this is the scarce item."},
+    book:"Villa booked — see “Where we're sleeping”: Option A (MariSol) is here in Ferragudo, Option B is in Lagos. Group vote by Sept 15."},
   benagil:{name:"Benagil Cave",region:"algarve",lat:37.0870,lng:-8.4260,
     wiki:["Benagil"],
     desc:"The famous domed sea cave with a round skylight in its roof — a cathedral of ochre rock lit from above. Since 2024, entry is licensed boats and guided kayaks only; no landing on the sand inside, and time inside is capped at a few minutes.",
@@ -457,6 +503,63 @@ const DEST = {
     desc:"A marine-themed park at Guia: dolphin presentations, aquaria, pools with slides and a small funfair. Polished, easy, and entirely aimed at your children's demographic.",
     kid:"This eats a whole day — deploy it only if the kids have earned a payday. The pool zone means bring swim gear.",
     book:"Book online for gate savings; check show times on arrival."},
+  stayLisbon:{name:"Montebelo Lisbon Downtown",region:"stay",lat:38.71137,lng:-9.13700,pinLabel:"H",
+    photos:[
+      {src:"photos/montebelo/t2-3.jpg",cap:"Our apartment (T2 type) · living & dining"},
+      {src:"photos/montebelo/t2-1.jpg",cap:"Our apartment (T2 type) · living room"},
+      {src:"photos/montebelo/t2-10.jpg",cap:"Our apartment (T2 type) · kitchen"},
+      {src:"photos/montebelo/t2-4.jpg",cap:"Our apartment (T2 type) · bedroom"},
+      {src:"photos/montebelo/t2-5.jpg",cap:"Our apartment (T2 type) · second bedroom"},
+      {src:"photos/montebelo/t2-6.jpg",cap:"Our apartment (T2 type) · twin room"},
+      {src:"photos/montebelo/t2-7.jpg",cap:"Our apartment (T2 type) · bedroom with the old beams"},
+      {src:"photos/montebelo/t2-8.jpg",cap:"Our apartment (T2 type) · kids' bunk room"},
+      {src:"photos/montebelo/t2-11.jpg",cap:"Our apartment (T2 type) · bathroom"},
+      {src:"photos/montebelo/restaurant-1.jpg",cap:"Common area · Zambeze restaurant downstairs"}
+    ],
+    desc:"Home for the Lisbon half: an aparthotel on Rua da Prata in the flat Baixa grid, rated 9.5/10 across 700+ reviews. We have two identical Two-Bedroom Apartments — each with a full kitchen, washing machine and soundproofed windows — plus a staffed reception downstairs.",
+    kid:"No morning starts with a transit hop: tram to Belém 2 min away, Rossio station (Sintra train) 5, metro 4. High chairs in the apartments; reception holds our luggage until check-in on arrival day.",
+    book:"BOOKED · Sept 26–30 · 2× Two-Bedroom Apartment · CAD 4,595 all-in · free cancellation until Sept 23 · check-in 15:00–18:00 (early check-in requested) · checkout 11:00. Photos are the hotel's official T2 set — unit finishes vary slightly."},
+  stayMarisol:{name:"Villa MariSol — Option A",region:"stay",lat:37.11307,lng:-8.51238,pinLabel:"A",
+    photos:[
+      {src:"photos/marisol/img-1.jpg",cap:"The pool and garden — the whole villa is ours"},
+      {src:"photos/marisol/img-2.jpg",cap:"The villa at dusk"},
+      {src:"photos/marisol/img-17.jpg",cap:"Living room — with indoor hammocks"},
+      {src:"photos/marisol/img-27.jpg",cap:"Dining room"},
+      {src:"photos/marisol/img-14.jpg",cap:"Bedroom 1 of 4"},
+      {src:"photos/marisol/img-19.jpg",cap:"Bedroom 2 of 4"},
+      {src:"photos/marisol/img-20.jpg",cap:"Bedroom 3 of 4"},
+      {src:"photos/marisol/img-21.jpg",cap:"Bedroom 4 of 4"},
+      {src:"photos/marisol/img-29.jpg",cap:"One of the bathrooms"},
+      {src:"photos/marisol/img-3.jpg",cap:"Table tennis, with a sliver of sea"},
+      {src:"photos/marisol/img-7.jpg",cap:"Wood-fired pizza oven"},
+      {src:"photos/marisol/img-6.jpg",cap:"Outdoor dining under the pergola"},
+      {src:"photos/marisol/img-18.jpg",cap:"Hammock corner"},
+      {src:"photos/marisol/img-5.jpg",cap:"Pool, paddleboard included"}
+    ],
+    desc:"Algarve Option A: a detached four-bedroom villa on a quiet lane 1.3 km above Ferragudo village. Pool, big lawn, table tennis, hot tub, pizza oven — and the best position on the map for our caves-and-castles half: Carvoeiro boats, Praia da Marinha, Silves and Zoomarine are all 10–25 minutes away.",
+    kid:"Built for kid downtime: a lawn to run, pool, ping-pong and pizza nights at home. Ferragudo's square and Praia Grande beach are a 15-minute walk or 3-minute drive.",
+    book:"BOOKED, pending the vote · Sept 30–Oct 4 · sleeps 8 · CAD 3,606 all-in · free cancellation until SEPT 24 · check-in from 16:00 (early requested) · checkout 11:00 · free parking on site."},
+  stayLimoeiro:{name:"Vila Limoeiro — Option B",region:"stay",lat:37.08833,lng:-8.68910,pinLabel:"B",
+    photos:[
+      {src:"photos/limoeiro/pic-4.jpg",cap:"Balcony view over Porto de Mós — the whole house is ours"},
+      {src:"photos/limoeiro/pic-1.jpg",cap:"The Atlantic from the garden"},
+      {src:"photos/limoeiro/pic-2.jpg",cap:"Sea view"},
+      {src:"photos/limoeiro/pic-10.jpg",cap:"The house and private pool"},
+      {src:"photos/limoeiro/pic-22.jpg",cap:"Pool and garden"},
+      {src:"photos/limoeiro/pic-13.jpg",cap:"Poolside"},
+      {src:"photos/limoeiro/pic-8.jpg",cap:"Lemon tree by the pool"},
+      {src:"photos/limoeiro/pic-12.jpg",cap:"Living room"},
+      {src:"photos/limoeiro/pic-7.jpg",cap:"Dining room"},
+      {src:"photos/limoeiro/pic-15.jpg",cap:"Kitchen"},
+      {src:"photos/limoeiro/pic-3.jpg",cap:"Master bedroom"},
+      {src:"photos/limoeiro/pic-11.jpg",cap:"Twin bedroom"},
+      {src:"photos/limoeiro/pic-9.jpg",cap:"Bedroom"},
+      {src:"photos/limoeiro/pic-6.jpg",cap:"Bedroom"},
+      {src:"photos/limoeiro/pic-5.jpg",cap:"Front entrance"}
+    ],
+    desc:"Algarve Option B: a four-bedroom clifftop home above Praia do Porto de Mós, on the west side of Lagos. Private pool, lemon trees, and a balcony looking straight out over the Atlantic. Porto de Mós beach is an 8-minute walk downhill; the clifftop boardwalk runs toward Ponta da Piedade.",
+    kid:"Beach within walking distance and the pool at home. Lagos old town, marina and ice cream are a 5-minute drive — dinner means driving, but a short one.",
+    book:"BOOKED, pending the vote · Sept 30–Oct 4 · sleeps 8 · CAD 3,155 all-in · ⚠ free cancellation ENDS SEPT 15, 100% charge after · €300 damage deposit on arrival · check-in 17:00–20:00 · checkout 10:00."},
   airport:{name:"Lisbon Airport (LIS)",region:"transfer",lat:38.7756,lng:-9.1354,
     wiki:["Lisbon Airport"],
     desc:"Humberto Delgado Airport. Arrival Sept 26 at 10:30; departure Oct 4 at 18:30. The van gets dropped here on the way out.",
@@ -501,7 +604,7 @@ const DAYS = [
      {t:"11:30",d:"comporta",b:"Optional lunch detour — rice paddies & storks"},
      {t:"13:30",d:"ferragudo",b:"Arrive · big grocery shop · settle in"},
    ],
-   note:"Check-in usually 15:00 — eat first. Dinner in the village square."},
+   note:"<strong>Check-in is late at both villa options</strong> — MariSol from 16:00, Limoeiro 17:00–20:00 (early check-in requested at both). Long lunch and the grocery run first; the beach bag stays accessible in the van."},
   {id:"d6",num:"Thu 1",title:"Boats — caves & dolphins",region:"algarve",
    sub:"Morning = calmest sea and the best light through the Benagil skylight. Book ahead.",
    stops:[
@@ -526,7 +629,7 @@ const DAYS = [
    ],
    note:"<strong>Recommendation: Silves.</strong> Half a day out, half in the pool."},
   {id:"d9",num:"Sun 4",title:"Departure",region:"transfer",
-   sub:"Last swim at 08:00, check out 11:00, early lunch in Ferragudo.",
+   sub:"Last swim at 08:00 · checkout 11:00 (Option A) or 10:00 sharp (Option B) · early lunch before the drive.",
    stops:[
      {t:"12:30",d:"airport",b:"Depart — non-negotiable · van back by 15:15 · fly 18:30"},
    ],
@@ -548,7 +651,7 @@ DAYS.forEach((day,di)=>{
 Object.entries(DEST).forEach(([id,d])=>{
   const el = document.createElement('div');
   el.className = `pin ${d.region}`;
-  el.innerHTML = `<span>${destDayNum[id]||''}</span>`;
+  el.innerHTML = `<span>${d.pinLabel||destDayNum[id]||''}</span>`;
   const icon = L.divIcon({className:'',html:el.outerHTML,iconSize:[26,26],iconAnchor:[13,24]});
   const m = L.marker([d.lat,d.lng],{icon,title:d.name,keyboard:true}).addTo(map);
   m.on('click',()=>selectDest(id,{scrollCard:true}));
@@ -581,8 +684,8 @@ panel.innerHTML = `
   <p class="sub">Ordered by scarcity. Items 1–4 this week.</p>
   <ul class="check">
     <li class="hot"><span class="n">1</span><div><strong>Flights YUL–LIS ×8</strong> — <span class="why">biggest cost swing, do it first.</span></div></li>
-    <li class="hot"><span class="n">2</span><div><strong>Algarve villa with pool, sleeps 8</strong> — <span class="why">Ferragudo / Carvoeiro / Lagoa. The scarcest lodging item.</span></div></li>
-    <li class="hot"><span class="n">3</span><div><strong>Lisbon apartment(s), sleeps 8</strong> — <span class="why">two adjacent 2-beds beats one 4-bed: easier to find, better for bedtimes.</span></div></li>
+    <li class="done"><span class="n">✓</span><div><strong>Algarve villa</strong> — <span class="why">two options booked, both refundable for now — see “Where we're sleeping” below. Vote &amp; cancel one by Sept 15.</span></div></li>
+    <li class="done"><span class="n">✓</span><div><strong>Lisbon: Montebelo Downtown booked</strong> — <span class="why">2× Two-Bedroom Apartment, Sept 26–30, free cancellation until Sept 23.</span></div></li>
     <li class="hot"><span class="n">4</span><div><strong>8-seat van, Sept 30 → Oct 4</strong> — <span class="why">downtown pickup, airport drop. Confirm the branch actually holds an 8-seater. Add 2 child seats (ECE R44/R129 — Canadian seats generally don't qualify).</span></div></li>
     <li><span class="n">5</span><div><strong>Airport transfer with child seats, Sept 26</strong> — <span class="why">don't improvise at 10:30 with luggage and two wrecked kids.</span></div></li>
     <li><span class="n">6</span><div><strong>Pena park ticket + shuttle</strong>, <strong>Regaleira</strong>, <strong>Jerónimos</strong>, <strong>Oceanário</strong> — <span class="why">all timed entries, all online.</span></div></li>
@@ -590,6 +693,84 @@ panel.innerHTML = `
     <li><span class="n">8</span><div><strong>Dinner tables for 8</strong> — <span class="why">Ferragudo & Carvoeiro rooms are small; reserve ahead.</span></div></li>
   </ul>`;
 itin.appendChild(panel);
+
+/* where we're sleeping */
+const stayStrip = (id,n)=>DEST[id].photos.slice(0,n).map(p=>`<img src="${p.src}" alt="${p.cap}" loading="lazy">`).join('');
+const staysPanel = document.createElement('section');
+staysPanel.className='panel';
+staysPanel.innerHTML = `
+  <h2>Where we're sleeping</h2>
+  <p class="sub">Lisbon is locked in. The Algarve has <strong>two live bookings — look at both, then vote</strong>. Tap any card for the full photo tour.</p>
+
+  <div class="stay-card" role="button" tabindex="0" data-stay="stayLisbon">
+    <div class="stay-strip">${stayStrip('stayLisbon',6)}</div>
+    <div class="stay-head">
+      <span class="stay-badge booked">Booked</span>
+      <h3>Montebelo Lisbon Downtown</h3>
+      <span class="stay-where">Rua da Prata 156, Baixa · Sept 26–30 · pin H on the map</span>
+    </div>
+    <ul class="stay-facts">
+      <li><strong>2 × Two-Bedroom Apartment</strong> — kitchen, washer &amp; soundproofing in each; kids' bunk rooms in some units</li>
+      <li><strong>9.5 / 10</strong> on Booking (700+ reviews) · staffed reception holds our bags before the 15:00 check-in</li>
+      <li>Tram to Belém <strong>2 min</strong> · Sintra train at Rossio <strong>5 min</strong> · metro to the Oceanário <strong>4 min</strong> — all flat</li>
+      <li><strong>CAD 4,595</strong> all-in · free cancellation until <strong>Sept 23</strong></li>
+    </ul>
+    <div class="stay-more">See all ${DEST.stayLisbon.photos.length} photos ›</div>
+  </div>
+
+  <div class="vote-callout">🗳 <strong>The Algarve vote — decide by Sept 15.</strong> Option B becomes 100% non-refundable on Sept 16 (Option A stays free to cancel until Sept 24). Both are held for now; once the group picks, we cancel the other — before the deadline.</div>
+
+  <div class="stay-grid">
+    <div class="stay-card" role="button" tabindex="0" data-stay="stayMarisol">
+      <div class="stay-strip">${stayStrip('stayMarisol',5)}</div>
+      <div class="stay-head">
+        <span class="stay-badge opta">Option A</span>
+        <h3>Villa MariSol</h3>
+        <span class="stay-where">Ferragudo · whole villa, 4 bd · pin A</span>
+      </div>
+      <ul class="stay-facts">
+        <li><strong>CAD 3,606</strong> all-in · check-in from 16:00 · checkout 11:00</li>
+        <li>Pool, big lawn, table tennis, hot tub, <strong>pizza oven</strong></li>
+      </ul>
+      <div class="pc">
+        <span class="p">10–15 min to the Benagil boats, Marinha, Silves &amp; Zoomarine — and the shortest drive back to LIS</span>
+        <span class="p">Huge private grounds — kids self-entertain</span>
+        <span class="p">Refundable until Sept 24 — low-stakes choice</span>
+        <span class="c">~55 min to Sagres/Lagos on the big west day</span>
+        <span class="c">Village is 1.3 km — dinner is a short drive; sea is a glimpse, not a view</span>
+        <span class="c">CAD 450 more than Option B</span>
+      </div>
+      <div class="stay-more">See all ${DEST.stayMarisol.photos.length} photos ›</div>
+    </div>
+
+    <div class="stay-card" role="button" tabindex="0" data-stay="stayLimoeiro">
+      <div class="stay-strip">${stayStrip('stayLimoeiro',5)}</div>
+      <div class="stay-head">
+        <span class="stay-badge optb">Option B</span>
+        <h3>Vila Limoeiro</h3>
+        <span class="stay-where">Porto de Mós, Lagos · whole house, 4 bd · pin B</span>
+      </div>
+      <ul class="stay-facts">
+        <li><strong>CAD 3,155</strong> all-in · check-in 17:00–20:00 · checkout 10:00 · €300 deposit</li>
+        <li>Oceanfront: private pool, Atlantic views, beach 8 min on foot</li>
+      </ul>
+      <div class="pc">
+        <span class="p">True sea views; walkable beach &amp; clifftop path toward Ponta da Piedade</span>
+        <span class="p">Sagres &amp; Lagos day becomes easy (~30 min); old town 5 min drive</span>
+        <span class="p">CAD 450 cheaper</span>
+        <span class="c">35–40 min each way to Benagil boats, Marinha, Silves, Zoomarine; longest airport run (~3 h)</span>
+        <span class="c">Check-in 17:00–20:00 &amp; checkout 10:00 — awkward with our ~13:30 arrival and tight exit day</span>
+        <span class="c">⚠ Non-refundable after <strong>Sept 15</strong></span>
+      </div>
+      <div class="stay-more">See all ${DEST.stayLimoeiro.photos.length} photos ›</div>
+    </div>
+  </div>`;
+itin.appendChild(staysPanel);
+staysPanel.querySelectorAll('.stay-card').forEach(c=>{
+  const open = ()=>selectDest(c.dataset.stay);
+  c.addEventListener('click',open);
+  c.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); open(); } });
+});
 
 /* day tabs */
 const tabs = document.getElementById('daytabs');
@@ -673,8 +854,9 @@ const IMG_SKIP = /\.svg$|\.ogg$|\.webm$|map|location|coat[_ ]of|flag|logo|icon|e
 const MAX_PHOTOS = 10;
 const imgCache = {};
 async function loadImages(id){
-  if(imgCache[id]) return imgCache[id];
   const d = DEST[id];
+  if(d.photos) return d.photos; /* stays: curated local photos with captions */
+  if(imgCache[id]) return imgCache[id];
   const urls = [], seen = new Set();
   for(const title of d.wiki){
     try{
@@ -710,6 +892,7 @@ const phDots = document.getElementById('ph-dots');
 const phPrev = document.getElementById('ph-prev');
 const phNext = document.getElementById('ph-next');
 let phCount = 0;
+let phCredit = 'Wikipedia';
 
 function phIndex(){
   return phTrack.clientWidth ? Math.round(phTrack.scrollLeft/phTrack.clientWidth) : 0;
@@ -717,7 +900,7 @@ function phIndex(){
 function phUpdate(){
   const i = phIndex();
   phDots.querySelectorAll('i').forEach((d,k)=>d.classList.toggle('on',k===i));
-  if(phCount>1) shCredit.textContent = (i+1)+' / '+phCount+' · Wikipedia';
+  if(phCount>1) shCredit.textContent = (i+1)+' / '+phCount+(phCredit?' · '+phCredit:'');
 }
 function phGo(dir){
   phTrack.scrollBy({left:dir*phTrack.clientWidth,behavior:'smooth'});
@@ -730,18 +913,27 @@ function clearCarousel(){
   phTrack.innerHTML=''; phDots.innerHTML=''; phCount=0;
   phPrev.style.display=phNext.style.display=phDots.style.display='none';
 }
-function renderCarousel(urls,name){
+function renderCarousel(urls,name,credit){
   clearCarousel();
+  phCredit = credit===undefined ? 'Wikipedia' : credit;
   phCount = urls.length;
   urls.forEach((u,i)=>{
+    const item = typeof u==='string' ? {src:u,cap:null} : u;
     const slide = document.createElement('div');
     slide.className='ph-slide';
     const img = document.createElement('img');
     img.loading = i===0 ? 'eager' : 'lazy';
-    img.alt = name+' — photo '+(i+1)+' of '+urls.length;
-    img.src = upscale(u,1000);
-    img.onerror = ()=>{ if(!img.dataset.retried){ img.dataset.retried='1'; img.src=u; } };
+    img.alt = item.cap || (name+' — photo '+(i+1)+' of '+urls.length);
+    const big = upscale(item.src,1000);
+    img.src = big;
+    if(big!==item.src) img.onerror = ()=>{ if(!img.dataset.retried){ img.dataset.retried='1'; img.src=item.src; } };
     slide.appendChild(img);
+    if(item.cap){
+      const cap = document.createElement('div');
+      cap.className='ph-cap';
+      cap.textContent = item.cap;
+      slide.appendChild(cap);
+    }
     phTrack.appendChild(slide);
     const dot = document.createElement('i');
     phDots.appendChild(dot);
@@ -751,8 +943,8 @@ function renderCarousel(urls,name){
     phPrev.style.display=phNext.style.display='grid';
     phDots.style.display='flex';
   }
-  shCredit.textContent = phCount>1 ? '1 / '+phCount+' · Wikipedia' : 'Wikipedia';
-  shCredit.style.display='block';
+  shCredit.textContent = phCount>1 ? '1 / '+phCount+(phCredit?' · '+phCredit:'') : (phCredit||'');
+  shCredit.style.display = (phCount>1||phCredit) ? 'block' : 'none';
   phUpdate();
 }
 
@@ -769,7 +961,7 @@ async function selectDest(id,{scrollCard=false}={}){
   setMarkerState(currentDay===null?null:new Set(DAYS[currentDay].stops.map(s=>s.d)), id);
   map.flyTo([d.lat,d.lng], Math.max(map.getZoom(),12), {duration:.7});
   /* sheet content */
-  document.getElementById('sheet-region').textContent = d.region==='lisbon'?'Lisbon & Sintra':d.region==='algarve'?'Algarve':'Transfer';
+  document.getElementById('sheet-region').textContent = d.region==='lisbon'?'Lisbon & Sintra':d.region==='algarve'?'Algarve':d.region==='stay'?'Where we sleep':'Transfer';
   document.getElementById('sheet-region').className='region-tag '+d.region;
   document.getElementById('sheet-title').textContent=d.name;
   document.getElementById('sheet-desc').textContent=d.desc;
@@ -788,7 +980,7 @@ async function selectDest(id,{scrollCard=false}={}){
   if(selectedDest!==id) return; // user moved on
   if(urls.length){
     shFall.style.display='none';
-    renderCarousel(urls, d.name);
+    renderCarousel(urls, d.name, d.photos ? '' : 'Wikipedia');
   }else{
     shFall.textContent = d.name;
   }
