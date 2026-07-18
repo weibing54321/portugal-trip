@@ -713,14 +713,14 @@ const RB_LEGS = [
   {d:2, pos:-1, n:"Hotel → Belém", mode:"🚋 tram 15E", dur:"~25 min", flg:"r", c:["stayLisbon","jeronimos"]},
   {d:2, pos:2,  n:"Belém → Hotel", mode:"🚋 tram 15E", dur:"~25 min", flg:"r", c:["torre","stayLisbon"]},
   {d:3, pos:-1, n:"Hotel → Quinta da Regaleira (by train)", mode:"🚆 train from Rossio + 15-min walk", dur:"~1 h", flg:"r", c:["stayLisbon","regaleira"]},
-  {d:3, pos:-1, n:"Hotel → Quinta da Regaleira (by Uber)", mode:"🚕 two Ubers, door to door", dur:"~45 min", flg:"d", c:["stayLisbon","regaleira"]},
-  {d:3, pos:0,  n:"Regaleira → Pena Palace", mode:"🛺 two tuk-tuks up the hill", dur:"~15 min", flg:"d", c:["regaleira","pena"]},
+  {d:3, pos:-1, n:"Hotel → Quinta da Regaleira (by Uber)", mode:"🚕 two Ubers, door to door", dur:"~45 min", price:"≈€60–80 for both cars", flg:"d", c:["stayLisbon","regaleira"]},
+  {d:3, pos:0,  n:"Regaleira → Pena Palace", mode:"🛺 two tuk-tuks up the hill", dur:"~15 min", price:"≈€5–10 per person", flg:"w", lock:1, c:["regaleira","pena"]},
   {d:3, pos:1,  n:"Pena → Hotel (by train)", mode:"🚆 tuk-tuk to the station + train", dur:"~1 h 10", flg:"r", c:["pena","stayLisbon"]},
-  {d:3, pos:1,  n:"Pena → Hotel (by Uber)", mode:"🚕 two Ubers from the gate", dur:"~45 min", flg:"d", c:["pena","stayLisbon"]},
+  {d:3, pos:1,  n:"Pena → Hotel (by Uber)", mode:"🚕 two Ubers from the gate", dur:"~45 min", price:"≈€60–80 for both cars", flg:"d", c:["pena","stayLisbon"]},
   {d:4, pos:-1, n:"Hotel → Oceanário", mode:"🚇 metro via Alameda", dur:"~25 min", flg:"r", c:["stayLisbon","oceanario"]},
   {d:4, pos:1,  n:"Parque das Nações → Alfama", mode:"🚇 metro", dur:"~25 min", flg:"r", c:["telecabine","alfama"]},
   {d:4, pos:2,  n:"Alfama → Hotel", mode:"🚶 downhill walk", dur:"~12 min", flg:"w", c:["alfama","stayLisbon"]},
-  {d:5, pos:-1, n:"Hotel → Sixt van pickup", mode:"🚕 two Ubers", dur:"~10 min", flg:"d", c:["stayLisbon","sixt"]},
+  {d:5, pos:-1, n:"Hotel → Sixt van pickup", mode:"🚕 two Ubers", dur:"~10 min", price:"≈€12–16 for both", flg:"d", c:["stayLisbon","sixt"]},
   {d:5, pos:0,  n:"Sixt → Comporta → Villa", mode:"🚐 the van, A2 south", dur:"~2 h 45", flg:"d", c:["sixt","comporta","ferragudo"]},
   {d:6, pos:-1, n:"Villa → Benagil boats", mode:"🚐 the van", dur:"~15 min", flg:"d", c:["ferragudo","benagil"]},
   {d:6, pos:0,  n:"Benagil → Praia da Marinha", mode:"🚐 the van", dur:"~10 min", flg:"d", c:["benagil","marinha"]},
@@ -744,7 +744,7 @@ function legGmapsUrl(leg){
 }
 function legHtml(i, leg){
   return `<button class="rb-leg" type="button" data-leg="${i}" data-region="${DAYS[leg.d-1].region}">
-    <span class="rb-txt"><strong>${leg.n}</strong><span class="rb-mode">${leg.mode} · ${leg.dur}</span></span>
+    <span class="rb-txt"><strong>${leg.n}</strong><span class="rb-mode">${leg.mode} · ${leg.dur}${leg.price?' · '+leg.price:''}</span></span>
     <span class="rb-see">route ▸ map</span>
     <a class="rb-g" href="${legGmapsUrl(leg)}" target="_blank" rel="noopener">Google ↗</a>
   </button>`;
@@ -914,10 +914,20 @@ function stopRow(id){
 }
 /* once a route is actually computed, sync the real time into its leg row */
 function updateLegDur(leg, text){
+  if(leg.lock) return; /* curated time (e.g. tuk-tuks) — engines route it as a car and get it wrong */
   leg.dur = text;
   const i = RB_LEGS.indexOf(leg);
   const el = document.querySelector(`.rb-leg[data-leg="${i}"] .rb-mode`);
-  if(el) el.textContent = leg.mode+' · '+text;
+  if(el) el.textContent = leg.mode+' · '+text+(leg.price?' · '+leg.price:'');
+}
+function renderLockedInfo(leg){
+  let rows = '';
+  leg.c.forEach((id,i)=>{
+    rows += stopRow(id);
+    if(i<leg.c.length-1) rows += `<div class="gi-leg">↓ ${leg.dur} · direct up the hill</div>`;
+  });
+  showRouteInfo(`<div class="gi-title">${leg.n}</div>
+    <div class="gi-total">${leg.mode} · <strong>${leg.dur}</strong>${leg.price?' · '+leg.price:''}</div>${rows}`);
 }
 function renderGInfo(leg,res){
   const r = res.routes[0];
@@ -945,7 +955,7 @@ function renderGInfo(leg,res){
     }
   });
   showRouteInfo(`<div class="gi-title">${leg.n}</div>
-    <div class="gi-total">${leg.mode} · <strong>${fmtSec(total)}</strong> · ${(dist/1000).toFixed(dist>20000?0:1)} km</div>${rows}`);
+    <div class="gi-total">${leg.mode} · <strong>${fmtSec(total)}</strong> · ${(dist/1000).toFixed(dist>20000?0:1)} km${leg.price?' · '+leg.price:''}</div>${rows}`);
 }
 function renderOsmInfo(leg,data){
   if(data && leg.flg==='d') updateLegDur(leg, fmtSec(data.duration));
@@ -959,7 +969,7 @@ function renderOsmInfo(leg,data){
   });
   const total = data && leg.flg==='d' ? `<strong>${fmtSec(data.duration)}</strong> · ${(data.distance/1000).toFixed(data.distance>20000?0:1)} km` : `<strong>${leg.dur}</strong>`;
   showRouteInfo(`<div class="gi-title">${leg.n}</div>
-    <div class="gi-total">${leg.mode} · ${total}</div>${rows}`);
+    <div class="gi-total">${leg.mode} · ${total}${leg.price?' · '+leg.price:''}</div>${rows}`);
 }
 function mapDrawPolyline(pts,color){
   mapClearRoute();
@@ -988,11 +998,19 @@ async function mapShowLegRoute(leg){
     },(res,status)=>{
       if(status==='OK'){
         gDirRen.setDirections(res);
-        renderGInfo(leg,res);
+        if(leg.lock) renderLockedInfo(leg); else renderGInfo(leg,res);
         mapSetState(new Set(leg.c), selectedDest);
       }
       else{ gDirRen.setMap(null); mapDrawPolyline(pts,'#4285F4'); mapFitPts(pts); renderOsmInfo(leg,null); }
     });
+    return;
+  }
+  if(leg.lock){
+    /* engines can only route this as a car (huge one-way loop) — draw the direct hop */
+    mapDrawPolyline(pts,'#4285F4');
+    mapFitPts(pts);
+    renderLockedInfo(leg);
+    mapSetState(new Set(leg.c), selectedDest);
     return;
   }
   const key = leg.c.join('_');
