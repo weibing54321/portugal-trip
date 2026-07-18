@@ -165,6 +165,27 @@ body.map-open .map-fab{background:var(--paper-2);color:var(--ink)}
   border:1px solid var(--cobalt);border-radius:99px;padding:2px 9px;white-space:nowrap;
 }
 .rb-g:hover{background:var(--cobalt);color:#fff}
+/* route info card overlaid on the map */
+.gm-info{
+  display:none;margin:10px;max-width:280px;max-height:72%;overflow-y:auto;
+  background:#fff;border-radius:12px;box-shadow:0 6px 24px rgba(18,32,48,.28);
+  padding:12px 14px;font-family:'Karla',sans-serif;font-size:13px;color:var(--ink);
+  text-align:left;position:relative;
+}
+.gm-info.on-osm{position:absolute;top:10px;right:10px;z-index:900;margin:0}
+.gi-x{
+  position:absolute;top:8px;right:8px;width:24px;height:24px;border:none;border-radius:50%;
+  background:var(--paper);color:var(--ink-soft);font-size:12px;cursor:pointer;
+  display:grid;place-items:center;
+}
+.gi-x:hover{background:var(--line)}
+.gi-title{font-weight:700;font-size:13.5px;margin-bottom:2px;padding-right:24px}
+.gi-total{color:var(--ink-soft);font-size:12px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.gi-stop{display:flex;align-items:center;gap:7px;font-weight:700;font-size:12.5px;margin:2px 0}
+.gi-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 2px #fff,0 0 0 3px rgba(28,43,58,.18)}
+.gi-leg{margin:1px 0 3px 16px;color:var(--ink-soft);font-size:12px}
+.gi-transit{margin:2px 0 2px 0;font-size:12px;color:var(--ink)}
+@media (max-width:960px){.gm-info{max-width:230px;max-height:46%}}
 /* checklist + practical */
 .panel{
   background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);
@@ -759,7 +780,8 @@ function gPin(region, selected){
 window.initGMap = function(){
   G = new google.maps.Map(document.getElementById('map'),{
     center:{lat:38.0,lng:-8.85}, zoom:7,
-    mapTypeControl:false, streetViewControl:false, clickableIcons:false
+    mapTypeControl:false, streetViewControl:false, clickableIcons:false,
+    gestureHandling:'greedy'
   });
   gDirSvc = new google.maps.DirectionsService();
   gDirRen = new google.maps.DirectionsRenderer({suppressMarkers:true});
@@ -793,6 +815,7 @@ function initLeafletMap(){
     markers[id] = {m};
   });
   mapFitAll();
+  if(pendingLeg!==null){ const l=pendingLeg; pendingLeg=null; mapShowLegRoute(l); }
 }
 /* Google refused the key (API not enabled / bad restriction)? fall back to OSM */
 window.gm_authFailure = function(){
@@ -813,6 +836,7 @@ if(GMAPS_KEY){
   const s = document.createElement('script');
   s.src = 'https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(GMAPS_KEY)+'&callback=initGMap';
   s.async = true;
+  s.onerror = ()=>window.gm_authFailure(); /* script blocked/unreachable -> OSM */
   document.head.appendChild(s);
 }else{
   initLeafletMap();
@@ -853,6 +877,72 @@ function mapClearRoute(){
     routeLine = null;
   }
   if(gDirRen) gDirRen.setMap(null);
+  hideRouteInfo();
+}
+
+/* ---- route info card on the map: stops, durations, transit lines ---- */
+let infoDiv = null;
+function ensureInfoDiv(){
+  if(infoDiv) return infoDiv;
+  infoDiv = document.createElement('div');
+  infoDiv.className = 'gm-info' + (G ? '' : ' on-osm');
+  if(G) G.controls[google.maps.ControlPosition.LEFT_TOP].push(infoDiv);
+  else document.getElementById('map').appendChild(infoDiv);
+  return infoDiv;
+}
+function showRouteInfo(html){
+  ensureInfoDiv();
+  infoDiv.innerHTML = '<button class="gi-x" aria-label="Close route info">✕</button>'+html;
+  infoDiv.style.display = 'block';
+  infoDiv.querySelector('.gi-x').addEventListener('click', hideRouteInfo);
+}
+function hideRouteInfo(){ if(infoDiv) infoDiv.style.display='none'; }
+function fmtSec(s){
+  const m = Math.round(s/60);
+  return m>=60 ? Math.floor(m/60)+' h '+(m%60?m%60+' min':'') : m+' min';
+}
+function vehIcon(t){
+  return t==='TRAM' ? '🚋' : t==='SUBWAY'||t==='METRO_RAIL' ? '🚇'
+    : t==='BUS' ? '🚌' : t==='HEAVY_RAIL'||t==='COMMUTER_TRAIN'||t==='RAIL' ? '🚆' : '🚏';
+}
+function stopRow(id){
+  return `<div class="gi-stop"><span class="gi-dot" style="background:${REGION_COL[DEST[id].region]}"></span>${DEST[id].name}</div>`;
+}
+function renderGInfo(leg,res){
+  const r = res.routes[0];
+  const total = r.legs.reduce((a,l)=>a+l.duration.value,0);
+  const dist = r.legs.reduce((a,l)=>a+l.distance.value,0);
+  let rows = '';
+  leg.c.forEach((id,i)=>{
+    rows += stopRow(id);
+    const lg = r.legs[i];
+    if(lg){
+      let extra = '';
+      if(leg.flg==='r'){
+        extra = lg.steps.filter(s=>s.travel_mode==='TRANSIT').map(s=>{
+          const t = s.transit;
+          const ln = t.line.short_name || t.line.name || '';
+          return `<div class="gi-transit">${vehIcon(t.line.vehicle&&t.line.vehicle.type)} <strong>${ln}</strong> → ${t.headsign} · ${t.num_stops} stops · ${s.duration.text}</div>`;
+        }).join('');
+      }
+      rows += `<div class="gi-leg">↓ ${lg.duration.text} · ${lg.distance.text}${extra}</div>`;
+    }
+  });
+  showRouteInfo(`<div class="gi-title">${leg.n}</div>
+    <div class="gi-total">${leg.mode} · <strong>${fmtSec(total)}</strong> · ${(dist/1000).toFixed(dist>20000?0:1)} km</div>${rows}`);
+}
+function renderOsmInfo(leg,data){
+  let rows = '';
+  leg.c.forEach((id,i)=>{
+    rows += stopRow(id);
+    if(i<leg.c.length-1){
+      const lg = data && data.legs && data.legs[i];
+      rows += `<div class="gi-leg">↓ ${lg&&leg.flg==='d' ? fmtSec(lg.duration)+' · '+(lg.distance/1000).toFixed(1)+' km' : leg.mode.replace(/^\S+\s/,'')}</div>`;
+    }
+  });
+  const total = data && leg.flg==='d' ? `<strong>${fmtSec(data.duration)}</strong> · ${(data.distance/1000).toFixed(data.distance>20000?0:1)} km` : `<strong>${leg.dur}</strong>`;
+  showRouteInfo(`<div class="gi-title">${leg.n}</div>
+    <div class="gi-total">${leg.mode} · ${total}</div>${rows}`);
 }
 function mapDrawPolyline(pts,color){
   mapClearRoute();
@@ -868,7 +958,7 @@ function mapInvalidate(){ if(map) map.invalidateSize(); }
 /* draw a leg: Google's real directions when the key is in; OSRM roads otherwise */
 const legGeomCache = {};
 async function mapShowLegRoute(leg){
-  if(GMAPS_KEY && !G){ pendingLeg = leg; return; }
+  if(GMAPS_KEY && !G && !map){ pendingLeg = leg; return; } /* google still loading */
   mapClearRoute();
   const pts = leg.c.map(id=>[DEST[id].lat,DEST[id].lng]);
   if(G && gDirSvc){
@@ -879,25 +969,32 @@ async function mapShowLegRoute(leg){
       waypoints:pts.slice(1,-1).map(p=>({location:{lat:p[0],lng:p[1]},stopover:true})),
       travelMode: leg.flg==='r' ? google.maps.TravelMode.TRANSIT : leg.flg==='w' ? google.maps.TravelMode.WALKING : google.maps.TravelMode.DRIVING
     },(res,status)=>{
-      if(status==='OK'){ gDirRen.setDirections(res); }
-      else{ gDirRen.setMap(null); mapDrawPolyline(pts,'#4285F4'); mapFitPts(pts); }
+      if(status==='OK'){
+        gDirRen.setDirections(res);
+        renderGInfo(leg,res);
+        mapSetState(new Set(leg.c), selectedDest);
+      }
+      else{ gDirRen.setMap(null); mapDrawPolyline(pts,'#4285F4'); mapFitPts(pts); renderOsmInfo(leg,null); }
     });
     return;
   }
   const key = leg.c.join('_');
-  let g = legGeomCache[key];
-  if(g===undefined){
+  let data = legGeomCache[key];
+  if(data===undefined){
     try{
       const coords = pts.map(p=>p[1]+','+p[0]).join(';');
       const r = await fetch('https://router.project-osrm.org/route/v1/driving/'+coords+'?overview=simplified&geometries=polyline');
       const j = await r.json();
-      g = j.code==='Ok' ? j.routes[0].geometry : null;
-    }catch(e){ g = null; }
-    legGeomCache[key] = g;
+      data = j.code==='Ok' ? {geom:j.routes[0].geometry, duration:j.routes[0].duration, distance:j.routes[0].distance,
+        legs:(j.routes[0].legs||[]).map(l=>({duration:l.duration,distance:l.distance}))} : null;
+    }catch(e){ data = null; }
+    legGeomCache[key] = data;
   }
-  const line = g ? decodePolyline(g) : pts;
+  const line = data ? decodePolyline(data.geom) : pts;
   mapDrawPolyline(line, '#4285F4');
   mapFitPts(line);
+  renderOsmInfo(leg,data);
+  mapSetState(new Set(leg.c), selectedDest);
 }
 
 /* ============ ITINERARY RENDER ============ */
