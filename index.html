@@ -683,7 +683,7 @@ const DAYS = [
    console.cloud.google.com -> enable "Maps JavaScript API" + "Directions API",
    restrict it to this site's domain. Without a key the site falls back to
    the OpenStreetMap view and draws road routes from OSRM. */
-const GMAPS_KEY = "";
+const GMAPS_KEY = "AIzaSyBKJXmKcyUxdPbfoAIAt8DdrbaCXuAzWQ4";
 
 const RB_LEGS = [
   {d:1, pos:0,  n:"LIS Airport → Hotel", mode:"🚕 pre-booked transfer", dur:"~20 min", flg:"d", c:["airport","stayLisbon"]},
@@ -775,13 +775,10 @@ window.initGMap = function(){
   });
   mapFitAll();
   if(pendingLeg!==null){ const l=pendingLeg; pendingLeg=null; mapShowLegRoute(l); }
+  setTimeout(watchGmError, 3000);
+  setTimeout(watchGmError, 9000);
 };
-if(GMAPS_KEY){
-  const s = document.createElement('script');
-  s.src = 'https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(GMAPS_KEY)+'&callback=initGMap';
-  s.async = true;
-  document.head.appendChild(s);
-}else{
+function initLeafletMap(){
   map = L.map('map',{scrollWheelZoom:true,zoomControl:true});
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
     maxZoom:19,attribution:'&copy; OpenStreetMap contributors'
@@ -796,6 +793,29 @@ if(GMAPS_KEY){
     markers[id] = {m};
   });
   mapFitAll();
+}
+/* Google refused the key (API not enabled / bad restriction)? fall back to OSM */
+window.gm_authFailure = function(){
+  if(map) return; /* already fell back */
+  G = null; gDirSvc = null; gDirRen = null;
+  Object.keys(markers).forEach(k=>delete markers[k]);
+  const el = document.getElementById('map');
+  el.innerHTML = ''; el.className = '';
+  initLeafletMap();
+};
+/* some failures (e.g. ApiNotActivated) skip gm_authFailure but inject an
+   error overlay into the map div — watch for it and fall back too */
+function watchGmError(){
+  if(document.querySelector('#map .gm-err-container')) window.gm_authFailure();
+}
+
+if(GMAPS_KEY){
+  const s = document.createElement('script');
+  s.src = 'https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(GMAPS_KEY)+'&callback=initGMap';
+  s.async = true;
+  document.head.appendChild(s);
+}else{
+  initLeafletMap();
 }
 
 function mapFitPts(pts){
