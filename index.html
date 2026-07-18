@@ -195,6 +195,23 @@ body.map-open .map-fab{background:var(--paper-2);color:var(--ink)}
   background:var(--ochre-wash);border-left:3px solid var(--ochre);
   padding:12px 15px;border-radius:0 10px 10px 0;font-size:14px;margin-bottom:14px;
 }
+/* ---------- travel (flights + van) ---------- */
+.travel-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+@media (max-width:700px){.travel-grid{grid-template-columns:1fr}}
+.travel-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.travel-card .stay-head{padding:0 0 2px}
+.travel-card .stay-facts{padding:10px 0 0}
+.stay-badge.flight{background:var(--cobalt)}
+.stay-badge.van{background:var(--neutral)}
+.leg{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:8px;background:var(--paper-2)}
+.leg-route{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:400}
+.leg-route strong{font-weight:700}
+.leg-arrow{color:var(--ink-soft)}
+.fltno{
+  margin-left:auto;font-size:11.5px;font-weight:700;letter-spacing:.08em;
+  background:var(--cobalt-wash);color:var(--cobalt-deep);padding:3px 8px;border-radius:6px;white-space:nowrap;
+}
+.leg-detail{font-size:13px;color:var(--ink-soft);margin-top:3px}
 .pin.stay{background:#2E7D46}
 .region-tag.stay{background:#2E7D46}
 .ph-slide{position:relative}
@@ -503,6 +520,10 @@ const DEST = {
     desc:"A marine-themed park at Guia: dolphin presentations, aquaria, pools with slides and a small funfair. Polished, easy, and entirely aimed at your children's demographic.",
     kid:"This eats a whole day — deploy it only if the kids have earned a payday. The pool zone means bring swim gear.",
     book:"Book online for gate savings; check show times on arrival."},
+  sixt:{name:"Sixt Lisbon Centre/Estefânia",region:"transfer",lat:38.7278,lng:-9.1408,pinLabel:"S",
+    desc:"Sixt's downtown branch in Estefânia, a 10-minute Uber hop from the Baixa apartments. This is where we collect the 8-seat Mercedes V-Class (or similar — automatic, diesel, unlimited km) on the morning of Sept 30.",
+    kid:"Fit both child seats before leaving the lot — and note the booking currently includes only ONE booster; the 4-year-old needs a full child seat. Call Sixt ahead to add it.",
+    book:"Pickup Wed Sept 30 at 10:00 — the time is binding (60-min courtesy). Bring every driver's physical licence, passports, and a physical credit card in the renter's name. €969.63 due at pickup, plus a refundable deposit hold. Free cancellation until pickup."},
   stayLisbon:{name:"Montebelo Lisbon Downtown",region:"stay",lat:38.71137,lng:-9.13700,pinLabel:"H",
     photos:[
       {src:"photos/montebelo/t2-3.jpg",cap:"Our apartment (T2 type) · living & dining"},
@@ -562,9 +583,9 @@ const DEST = {
     book:"BOOKED, pending the vote · Sept 30–Oct 4 · sleeps 8 · CAD 3,155 all-in · ⚠ free cancellation ENDS SEPT 15, 100% charge after · €300 damage deposit on arrival · check-in 17:00–20:00 · checkout 10:00."},
   airport:{name:"Lisbon Airport (LIS)",region:"transfer",lat:38.7756,lng:-9.1354,
     wiki:["Lisbon Airport"],
-    desc:"Humberto Delgado Airport. Arrival Sept 26 at 10:30; departure Oct 4 at 18:30. The van gets dropped here on the way out.",
+    desc:"Humberto Delgado Airport. TP 254 lands here at 10:30 on Sept 26; TP 253 departs at 18:30 on Oct 4. The van gets dropped at the airport Sixt on the way out.",
     kid:null,
-    book:"Oct 4: leave Ferragudo by 12:30, van return by 15:15 (allow a full 30 min), check-in by 16:00. Non-Schengen exit — take the time seriously."}
+    book:"Oct 4: on the road by 11:00 — the van's booked return time is 14:00. Drop, shuttle to Terminal 1, check-in, and the non-Schengen passport exit — take the time seriously."}
 };
 
 const DAYS = [
@@ -599,10 +620,11 @@ const DAYS = [
    ],
    note:"Swap-in if needed: <strong>Pilar 7</strong> — the glass floor out on the 25 de Abril bridge deck."},
   {id:"d5",num:"Wed 30",title:"South — pick up the van, drive to the Algarve",region:"transfer",
-   sub:"Collect the 8-seater downtown at 08:30–09:00 (Sixt Picoas / Europcar Castilho), fit the child seats, confirm the Via Verde toll transponder, then the A2 south (~2h30).",
+   sub:"Two Ubers to Sixt Estefânia for the 10:00 pickup, swing back to the hotel for the luggage, then the A2 south (~2h30). Ask at the desk about the Via Verde toll transponder.",
    stops:[
-     {t:"11:30",d:"comporta",b:"Optional lunch detour — rice paddies & storks"},
-     {t:"13:30",d:"ferragudo",b:"Arrive · big grocery shop · settle in"},
+     {t:"10:00",d:"sixt",b:"Van pickup — booked for 10:00 · fit the child seats"},
+     {t:"12:15",d:"comporta",b:"Lunch detour — rice paddies & storks"},
+     {t:"15:00",d:"ferragudo",b:"Arrive · big grocery shop · settle in"},
    ],
    note:"<strong>Check-in is late at both villa options</strong> — MariSol from 16:00, Limoeiro 17:00–20:00 (early check-in requested at both). Long lunch and the grocery run first; the beach bag stays accessible in the van."},
   {id:"d6",num:"Thu 1",title:"Boats — caves & dolphins",region:"algarve",
@@ -629,11 +651,11 @@ const DAYS = [
    ],
    note:"<strong>Recommendation: Silves.</strong> Half a day out, half in the pool."},
   {id:"d9",num:"Sun 4",title:"Departure",region:"transfer",
-   sub:"Last swim at 08:00 · checkout 11:00 (Option A) or 10:00 sharp (Option B) · early lunch before the drive.",
+   sub:"Last swim at 08:00 · checkout 11:00 (Option A) or 10:00 sharp (Option B) · on the road by 11:00 — the van is due back at 14:00.",
    stops:[
-     {t:"12:30",d:"airport",b:"Depart — non-negotiable · van back by 15:15 · fly 18:30"},
+     {t:"11:00",d:"airport",b:"Drive north — van due back 14:00 · TP 253 flies 18:30"},
    ],
-   note:"Oct 5 is Republic Day (national holiday) — expect a busier-than-usual Sunday on the A2 and at LIS. Nervous? Leave at 12:00. Fuel before the airport."}
+   note:"Oct 5 is Republic Day (national holiday) — expect a busier-than-usual Sunday on the A2 and at LIS. Fuel before the airport (full-to-full), drop the van at 14:00, check-in, then the non-Schengen exit."}
 ];
 
 /* ============ MAP ============ */
@@ -683,10 +705,11 @@ panel.innerHTML = `
   <h2>Book first, sightsee later</h2>
   <p class="sub">Ordered by scarcity. Items 1–4 this week.</p>
   <ul class="check">
-    <li class="hot"><span class="n">1</span><div><strong>Flights YUL–LIS ×8</strong> — <span class="why">biggest cost swing, do it first.</span></div></li>
+    <li class="done"><span class="n">✓</span><div><strong>Flights booked: TAP TP 254 / TP 253 ×8</strong> — <span class="why">out Sept 25 22:45 → land 10:30; home Oct 4 at 18:30. Details in “Getting there”.</span></div></li>
     <li class="done"><span class="n">✓</span><div><strong>Algarve villa</strong> — <span class="why">two options booked, both refundable for now — see “Where we're sleeping” below. Vote &amp; cancel one by Sept 15.</span></div></li>
     <li class="done"><span class="n">✓</span><div><strong>Lisbon: Montebelo Downtown booked</strong> — <span class="why">2× Two-Bedroom Apartment, Sept 26–30, free cancellation until Sept 23.</span></div></li>
-    <li class="hot"><span class="n">4</span><div><strong>8-seat van, Sept 30 → Oct 4</strong> — <span class="why">downtown pickup, airport drop. Confirm the branch actually holds an 8-seater. Add 2 child seats (ECE R44/R129 — Canadian seats generally don't qualify).</span></div></li>
+    <li class="done"><span class="n">✓</span><div><strong>Van booked: Sixt Mercedes V-Class 8-seat</strong> — <span class="why">Sept 30 10:00 downtown → Oct 4 14:00 airport drop, €969.63 at pickup.</span></div></li>
+    <li class="hot"><span class="n">!</span><div><strong>Second child seat</strong> — <span class="why">the booking has ONE booster only. The 4-year-old needs a full child seat (ECE R129 — Canadian seats generally don't qualify). Call Sixt to add it.</span></div></li>
     <li><span class="n">5</span><div><strong>Airport transfer with child seats, Sept 26</strong> — <span class="why">don't improvise at 10:30 with luggage and two wrecked kids.</span></div></li>
     <li><span class="n">6</span><div><strong>Pena park ticket + shuttle</strong>, <strong>Regaleira</strong>, <strong>Jerónimos</strong>, <strong>Oceanário</strong> — <span class="why">all timed entries, all online.</span></div></li>
     <li><span class="n">7</span><div><strong>Benagil boat tour</strong> — <span class="why">morning departure, Carvoeiro or Portimão.</span></div></li>
@@ -766,6 +789,49 @@ staysPanel.innerHTML = `
     </div>
   </div>`;
 itin.appendChild(staysPanel);
+
+/* getting there & around */
+const travelPanel = document.createElement('section');
+travelPanel.className='panel';
+travelPanel.innerHTML = `
+  <h2>Getting there &amp; around</h2>
+  <p class="sub">Flights and the van are booked. Times are from the confirmations — recheck at online check-in.</p>
+  <div class="travel-grid">
+    <div class="travel-card">
+      <div class="stay-head"><span class="stay-badge flight">✈ Flights</span><h3>TAP Air Portugal · ×8</h3></div>
+      <div class="leg">
+        <div class="leg-route"><strong>YUL</strong><span class="leg-arrow">→</span><strong>LIS</strong><span class="fltno">TP 254</span></div>
+        <div class="leg-detail">Fri <strong>Sept 25</strong> · departs <strong>22:45</strong> · overnight · lands Saturday at <strong>10:30</strong></div>
+      </div>
+      <div class="leg">
+        <div class="leg-route"><strong>LIS</strong><span class="leg-arrow">→</span><strong>YUL</strong><span class="fltno">TP 253</span></div>
+        <div class="leg-detail">Sun <strong>Oct 4</strong> · departs <strong>18:30</strong> · lands Montréal ~21:00 the same evening</div>
+      </div>
+      <ul class="stay-facts">
+        <li>A321neo, nonstop ~7 h · pick seats together early · online check-in opens 36 h before</li>
+        <li>Overnight eastbound: the kids sleep on the plane and we land mid-morning — that's why Day 1 is deliberately empty</li>
+        <li>The return is a <strong>non-Schengen exit</strong>: passport queues — be airside early</li>
+      </ul>
+    </div>
+    <div class="travel-card">
+      <div class="stay-head"><span class="stay-badge van">🚐 The van</span><h3>Sixt · Mercedes V-Class 8-seat</h3></div>
+      <div class="leg">
+        <div class="leg-route"><strong>Pickup</strong><span class="fltno">Wed Sept 30 · 10:00</span></div>
+        <div class="leg-detail">Sixt Lisbon Centre/Estefânia, Rua José Estevão 3 — 10 min by Uber from Baixa · pin S on the map</div>
+      </div>
+      <div class="leg">
+        <div class="leg-route"><strong>Return</strong><span class="fltno">Sun Oct 4 · 14:00</span></div>
+        <div class="leg-detail">Lisbon Airport — drop the van, then Terminal 1 for the 18:30 flight</div>
+      </div>
+      <ul class="stay-facts">
+        <li><strong>€969.63 at pickup</strong> · automatic, diesel · unlimited km · third-party insurance included</li>
+        <li>Bring <strong>physical</strong> licences for every driver, passports, and a physical credit card in the renter's name · refundable deposit hold</li>
+        <li>⚠ Only <strong>one booster</strong> is on the booking — add a full child seat for the 4-year-old</li>
+        <li>Pickup time is binding (60-min courtesy) · free cancellation until pickup</li>
+      </ul>
+    </div>
+  </div>`;
+itin.appendChild(travelPanel);
 staysPanel.querySelectorAll('.stay-card').forEach(c=>{
   const open = ()=>selectDest(c.dataset.stay);
   c.addEventListener('click',open);
@@ -819,7 +885,7 @@ prac.innerHTML = `
   <ul class="check">
     <li><span class="n">🕐</span><div><strong>Jet lag:</strong> <span class="why">Montreal +5h. Kids wake early, fade by mid-afternoon — every big sight here is scheduled at opening, every day has an exit.</span></div></li>
     <li><span class="n">🌡</span><div><strong>Weather:</strong> <span class="why">Lisbon 24–26°C, Algarve a touch warmer, sea ~19–20°C (cold after Mexico — the kids won't care). Sintra is its own cooler microclimate.</span></div></li>
-    <li><span class="n">🚐</span><div><strong>Van:</strong> <span class="why">full-to-full fuel only · confirm Via Verde toll device price · video the car at pickup AND return, inside included · vacuum the beach sand out before returning.</span></div></li>
+    <li><span class="n">🚐</span><div><strong>Van:</strong> <span class="why">full-to-full fuel only · €969.63 due at pickup on a physical card in the renter's name (+ deposit hold) · ask about the Via Verde toll device · video the car at pickup AND return, inside included · vacuum the beach sand out before returning.</span></div></li>
     <li><span class="n">🚕</span><div><strong>Lisbon =</strong> <span class="why">Uber ×2 per hop, metro, and walking. No car, no parking, no exceptions.</span></div></li>
     <li><span class="n">💶</span><div><strong>Cash:</strong> <span class="why">small notes for the Ponta da Piedade boats and markets; cards everywhere else.</span></div></li>
   </ul>`;
@@ -857,8 +923,9 @@ async function loadImages(id){
   const d = DEST[id];
   if(d.photos) return d.photos; /* stays: curated local photos with captions */
   if(imgCache[id]) return imgCache[id];
-  const urls = [], seen = new Set();
-  for(const title of d.wiki){
+  /* 1) collect candidate file titles from the article(s) */
+  const titles = [], seen = new Set();
+  for(const title of (d.wiki||[])){
     try{
       const r = await fetch('https://en.wikipedia.org/api/rest_v1/page/media-list/'+encodeURIComponent(title));
       if(!r.ok) continue;
@@ -866,20 +933,47 @@ async function loadImages(id){
       for(const it of (j.items||[])){
         if(it.type!=='image') continue;
         if(IMG_SKIP.test(it.title||'')) continue;
-        const src = it.srcset && it.srcset[0] && it.srcset[0].src;
-        if(!src || seen.has(it.title)) continue;
+        if(seen.has(it.title)) continue;
         seen.add(it.title);
-        urls.push(('//'===src.slice(0,2)?'https:':'')+src);
-        if(urls.length>=MAX_PHOTOS) break;
+        titles.push(it.title);
+        if(titles.length>=MAX_PHOTOS*2) break; /* headroom: some get dropped below */
       }
     }catch(e){/* try next title */}
-    if(urls.length>=MAX_PHOTOS) break;
+    if(titles.length>=MAX_PHOTOS*2) break;
+  }
+  /* 2) resolve real sizes + a correctly scaled render; drop small originals
+        (tiny thumbs stretched over a retina screen are what pixelation is made of) */
+  const urls = [];
+  if(titles.length){
+    try{
+      const api = 'https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*'
+        +'&prop=imageinfo&iiprop=url%7Csize&iiurlwidth=1280&titles='
+        +encodeURIComponent(titles.join('|'));
+      const r = await fetch(api);
+      if(r.ok){
+        const j = await r.json();
+        const byTitle = {};
+        Object.values((j.query&&j.query.pages)||{}).forEach(p=>{
+          const ii = p.imageinfo && p.imageinfo[0];
+          if(ii) byTitle[p.title] = ii;
+        });
+        const norm = {};
+        (((j.query||{}).normalized)||[]).forEach(n=>{ norm[n.from]=n.to; });
+        for(const t of titles){
+          const ii = byTitle[norm[t]||t];
+          if(!ii) continue;
+          const ratio = ii.width/ii.height;
+          if(ii.width<640 || ii.height<480) continue;   /* too small to show */
+          if(ratio<0.55 || ratio>2.6) continue;         /* extreme crops look bad */
+          urls.push(ii.thumburl||ii.url);
+          if(urls.length>=MAX_PHOTOS) break;
+        }
+      }
+    }catch(e){/* fall through with whatever we have */}
   }
   imgCache[id]=urls;
   return urls;
 }
-/* media-list thumbs come back small (~500px); ask Wikimedia for a wider render */
-function upscale(u,w){ return u.replace(/\/(\d+)px-/, '/'+w+'px-'); }
 
 const sheet = document.getElementById('sheet');
 const backdrop = document.getElementById('backdrop');
@@ -924,9 +1018,7 @@ function renderCarousel(urls,name,credit){
     const img = document.createElement('img');
     img.loading = i===0 ? 'eager' : 'lazy';
     img.alt = item.cap || (name+' — photo '+(i+1)+' of '+urls.length);
-    const big = upscale(item.src,1000);
-    img.src = big;
-    if(big!==item.src) img.onerror = ()=>{ if(!img.dataset.retried){ img.dataset.retried='1'; img.src=item.src; } };
+    img.src = item.src;
     slide.appendChild(img);
     if(item.cap){
       const cap = document.createElement('div');
