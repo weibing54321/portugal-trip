@@ -185,6 +185,8 @@ body.map-open .map-fab{background:var(--paper-2);color:var(--ink)}
 .gi-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 2px #fff,0 0 0 3px rgba(28,43,58,.18)}
 .gi-leg{margin:1px 0 3px 16px;color:var(--ink-soft);font-size:12px}
 .gi-transit{margin:2px 0 2px 0;font-size:12px;color:var(--ink)}
+.gi-step{margin:2px 0;font-size:12px;color:var(--ink-soft)}
+.gi-step b{color:var(--ink)}
 @media (max-width:960px){.gm-info{max-width:230px;max-height:46%}}
 /* checklist + practical */
 .panel{
@@ -742,7 +744,7 @@ function legHtml(i, leg){
   return `<button class="rb-leg" type="button" data-leg="${i}" data-region="${DAYS[leg.d-1].region}">
     <span class="rb-txt"><strong>${leg.n}</strong><span class="rb-mode">${leg.mode} · ${leg.dur}</span></span>
     <span class="rb-see">route ▸ map</span>
-    ${leg.flg==='d'&&leg.mode.includes('🚐')?`<a class="rb-g" href="${legGmapsUrl(leg)}" target="_blank" rel="noopener">Google ↗</a>`:''}
+    <a class="rb-g" href="${legGmapsUrl(leg)}" target="_blank" rel="noopener">Google ↗</a>
   </button>`;
 }
 function decodePolyline(str){
@@ -908,9 +910,17 @@ function vehIcon(t){
 function stopRow(id){
   return `<div class="gi-stop"><span class="gi-dot" style="background:${REGION_COL[DEST[id].region]}"></span>${DEST[id].name}</div>`;
 }
+/* once a route is actually computed, sync the real time into its leg row */
+function updateLegDur(leg, text){
+  leg.dur = text;
+  const i = RB_LEGS.indexOf(leg);
+  const el = document.querySelector(`.rb-leg[data-leg="${i}"] .rb-mode`);
+  if(el) el.textContent = leg.mode+' · '+text;
+}
 function renderGInfo(leg,res){
   const r = res.routes[0];
   const total = r.legs.reduce((a,l)=>a+l.duration.value,0);
+  updateLegDur(leg, fmtSec(total));
   const dist = r.legs.reduce((a,l)=>a+l.distance.value,0);
   let rows = '';
   leg.c.forEach((id,i)=>{
@@ -918,11 +928,15 @@ function renderGInfo(leg,res){
     const lg = r.legs[i];
     if(lg){
       let extra = '';
-      if(leg.flg==='r'){
-        extra = lg.steps.filter(s=>s.travel_mode==='TRANSIT').map(s=>{
-          const t = s.transit;
-          const ln = t.line.short_name || t.line.name || '';
-          return `<div class="gi-transit">${vehIcon(t.line.vehicle&&t.line.vehicle.type)} <strong>${ln}</strong> → ${t.headsign} · ${t.num_stops} stops · ${s.duration.text}</div>`;
+      if(leg.flg==='r' || leg.flg==='w'){
+        /* the full step list, like Google shows it */
+        extra = lg.steps.map(s=>{
+          if(s.travel_mode==='TRANSIT'){
+            const t = s.transit;
+            const ln = t.line.short_name || t.line.name || '';
+            return `<div class="gi-transit">${vehIcon(t.line.vehicle&&t.line.vehicle.type)} <strong>${ln}</strong> → ${t.headsign} · ${t.num_stops} stops · ${s.duration.text}</div>`;
+          }
+          return `<div class="gi-step">🚶 ${s.instructions||'Walk'} · ${s.distance.text} · ${s.duration.text}</div>`;
         }).join('');
       }
       rows += `<div class="gi-leg">↓ ${lg.duration.text} · ${lg.distance.text}${extra}</div>`;
@@ -932,6 +946,7 @@ function renderGInfo(leg,res){
     <div class="gi-total">${leg.mode} · <strong>${fmtSec(total)}</strong> · ${(dist/1000).toFixed(dist>20000?0:1)} km</div>${rows}`);
 }
 function renderOsmInfo(leg,data){
+  if(data && leg.flg==='d') updateLegDur(leg, fmtSec(data.duration));
   let rows = '';
   leg.c.forEach((id,i)=>{
     rows += stopRow(id);
