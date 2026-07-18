@@ -141,84 +141,30 @@ body.map-open .map-fab{background:var(--paper-2);color:var(--ink)}
   background:transparent;border-left:3px solid var(--line);
   padding:6px 14px;font-size:13.5px;color:var(--ink-soft);margin-top:4px;
 }
-/* route blocks — a distinct visual component: tinted card + stop-dot chain */
-.route{
-  --rc:var(--neutral); --rw:#EDEEF0;
-  display:block;width:100%;margin-top:10px;padding:10px 14px 12px;
-  border:none;border-left:4px solid var(--rc);border-radius:0 11px 11px 0;
-  background:var(--rw);cursor:pointer;font:inherit;color:inherit;text-align:left;
-  transition:transform .15s,box-shadow .15s;
-}
-.route[data-region="lisbon"]{--rc:var(--cobalt);--rw:var(--cobalt-wash)}
-.route[data-region="algarve"]{--rc:var(--ochre);--rw:var(--ochre-wash)}
-.route:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
-.route:focus-visible{outline:3px solid var(--cobalt);outline-offset:2px}
-.rt-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.rt-label{
-  font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--rc);
-}
-.rt-mode{font-size:13px;color:var(--ink-soft)}
-.rt-dur{margin-left:auto;font-size:12px;color:var(--ink-soft);white-space:nowrap}
-.rt-g{
-  font-size:11.5px;font-weight:700;color:var(--rc);text-decoration:none;white-space:nowrap;
-  border:1px solid var(--rc);border-radius:99px;padding:2px 9px;
-}
-.rt-g:hover{background:var(--rc);color:#fff}
-.rt-day{
-  flex-shrink:0;font-size:10.5px;font-weight:700;letter-spacing:.1em;
-  padding:3px 8px;border-radius:6px;color:#fff;background:var(--rc,var(--neutral));
-}
-.rt-day[data-region="lisbon"]{background:var(--cobalt)}
-.rt-day[data-region="algarve"]{background:var(--ochre)}
-/* route book: legs + embedded Google directions */
-.rb-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:14px;align-items:stretch}
-@media (max-width:820px){.rb-grid{grid-template-columns:minmax(0,1fr)}}
-.rb-list{display:flex;flex-direction:column;gap:6px;max-height:560px;overflow-y:auto;padding-right:2px}
+/* route legs — the single route element, living in the timeline */
 .rb-leg{
-  display:flex;align-items:center;gap:10px;padding:9px 12px;
-  border:1px solid var(--line);border-radius:10px;background:var(--paper-2);
-  cursor:pointer;font:inherit;color:inherit;text-align:left;
-  transition:border-color .15s,background .15s;
+  display:flex;align-items:center;gap:10px;padding:10px 14px;width:100%;
+  border:1px solid var(--line);border-left:4px solid var(--neutral);border-radius:0 11px 11px 0;
+  background:var(--paper-2);cursor:pointer;font:inherit;color:inherit;text-align:left;
+  transition:border-color .15s,background .15s,transform .15s;
 }
-.rb-leg:hover{border-color:var(--cobalt)}
-.rb-leg.active{border-color:var(--cobalt);background:var(--cobalt-wash);box-shadow:var(--shadow)}
+.rb-leg[data-region="lisbon"]{border-left-color:var(--cobalt)}
+.rb-leg[data-region="algarve"]{border-left-color:var(--ochre)}
+.rb-leg:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+.rb-leg.active{background:var(--cobalt-wash);border-color:var(--cobalt);border-left-width:4px}
 .rb-leg:focus-visible{outline:3px solid var(--cobalt);outline-offset:2px}
 .rb-txt{display:flex;flex-direction:column;min-width:0}
-.rb-txt strong{font-size:13px;line-height:1.3}
+.rb-txt strong{font-size:13.5px;line-height:1.3}
 .rb-mode{font-size:12px;color:var(--ink-soft)}
-.rb-right{display:flex;flex-direction:column;gap:8px}
-.rb-map{
-  position:relative;flex:1;min-height:430px;border:1px solid var(--line);
-  border-radius:12px;overflow:hidden;background:var(--cobalt-wash);
+.rb-see{
+  margin-left:auto;flex-shrink:0;font-size:10.5px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--cobalt);white-space:nowrap;
 }
-.rb-map iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-.rb-steps{
-  border:1px solid var(--line);border-radius:12px;background:#fff;
-  padding:6px 12px;max-height:340px;overflow-y:auto;font-size:13.5px;
+.rb-g{
+  flex-shrink:0;font-size:11.5px;font-weight:700;color:var(--cobalt);text-decoration:none;
+  border:1px solid var(--cobalt);border-radius:99px;padding:2px 9px;white-space:nowrap;
 }
-.rb-steps img{max-width:100%}
-.rb-steps table{width:100%}
-.rb-open{
-  display:block;text-align:center;font-size:13.5px;font-weight:700;color:#fff;
-  background:var(--cobalt);padding:11px 14px;border-radius:10px;text-decoration:none;
-}
-.rb-open:hover{background:var(--cobalt-deep)}
-@media (max-width:820px){.rb-map{min-height:340px}}
-.rt-chain{
-  display:flex;align-items:center;margin-top:9px;overflow-x:auto;
-  scrollbar-width:none;padding-bottom:2px;
-}
-.rt-chain::-webkit-scrollbar{display:none}
-.rt-stop{display:flex;align-items:center;gap:6px;flex-shrink:0}
-.rt-dot{
-  width:10px;height:10px;border-radius:50%;background:var(--rc);flex-shrink:0;
-  box-shadow:0 0 0 2px rgba(255,255,255,.8);
-}
-.rt-stop.base .rt-dot{background:#fff;box-shadow:inset 0 0 0 2.5px var(--rc)}
-.rt-name{font-size:12.5px;font-weight:600;white-space:nowrap;color:var(--ink)}
-.rt-stop.base .rt-name{color:var(--ink-soft)}
-.rt-seg{flex-shrink:0;width:20px;height:0;border-top:2px dashed var(--rc);opacity:.5;margin:0 8px}
-.note strong{color:var(--ink)}
+.rb-g:hover{background:var(--cobalt);color:#fff}
 /* checklist + practical */
 .panel{
   background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);
@@ -463,7 +409,7 @@ body.map-open .map-fab{background:var(--paper-2);color:var(--ink)}
   <main id="itinerary"></main>
   <aside class="map-col">
     <div id="map" role="region" aria-label="Trip map"></div>
-    <p class="map-hint">Pins are numbered by day · click a pin to open its card</p>
+    <p class="map-hint">Pins numbered by day · tap a route in the itinerary to draw it here</p>
   </aside>
 </div>
 
@@ -729,40 +675,47 @@ const DAYS = [
    note:"Oct 5 is Republic Day (national holiday) — expect a busier-than-usual Sunday on the A2 and at LIS. Fuel before the airport (full-to-full), drop the van at 14:00, check-in, then the non-Schengen exit."}
 ];
 
-/* ============ ROUTES ============ */
-const SHORT = {
-  stayLisbon:"Hotel (Baixa)", ferragudo:"Villa (Ferragudo)", airport:"LIS", sixt:"Sixt",
-  praca:"Pç. Comércio", jeronimos:"Jerónimos", pasteis:"Pastéis", torre:"Torre de Belém",
-  regaleira:"Regaleira", pena:"Pena", oceanario:"Oceanário", telecabine:"Telecabine",
-  alfama:"Alfama", comporta:"Comporta", benagil:"Benagil boats", marinha:"Marinha",
-  sagres:"Sagres", cabosv:"Cabo S. Vicente", piedade:"Piedade", lagos:"Lagos",
-  silves:"Silves", zoomarine:"Zoomarine"
-};
-const ROUTES = {
-  d1:[{t:"Arrival transfer", mode:"🚕 pre-booked transfer", dur:"~20 min + a stroll", c:["airport","stayLisbon","praca"]}],
-  d2:[{t:"Belém loop", mode:"🚋 tram 15E", dur:"~20 min each way", c:["stayLisbon","jeronimos","pasteis","torre","stayLisbon"]}],
-  d3:[{t:"Sintra day", mode:"🚆 train from Rossio", dur:"~40 min each way", c:["stayLisbon","regaleira","pena","stayLisbon"]}],
-  d4:[{t:"Aquarium + Alfama", mode:"🚇 metro + walking", dur:"", c:["stayLisbon","oceanario","telecabine","alfama","stayLisbon"]}],
-  d5:[{t:"The drive south", mode:"🚐 the van", dur:"~2 h 45 driving", g:1, c:["stayLisbon","sixt","comporta","ferragudo"]}],
-  d6:[{t:"Boats & cliffs", mode:"🚐 the van", dur:"~40 min total", g:1, c:["ferragudo","benagil","marinha","ferragudo"]}],
-  d7:[{t:"The west day", mode:"🚐 the van", dur:"~2 h 10 total", g:1, c:["ferragudo","sagres","cabosv","piedade","lagos","ferragudo"]}],
-  d8:[{t:"Option A · Silves", mode:"🚐 the van", dur:"~50 min total", g:1, c:["ferragudo","silves","ferragudo"]},
-      {t:"Option B · Zoomarine", mode:"🚐 the van", dur:"~40 min total", g:1, c:["ferragudo","zoomarine","ferragudo"]}],
-  d9:[{t:"The home run", mode:"🚐 the van", dur:"~2 h 45 driving", g:1, c:["ferragudo","airport"]}]
-};
-/* real road geometries (precomputed via OSRM) as encoded polylines */
-const ROUTE_GEOM = {
-  "d1-0": "k`ukFlfxv@fAbB}NeK}IcByHd@yJvGsPbe@{FzD|In[pIdKjb@vKbQ~Ilj@tm@xVjh@rLlGvJj@~y@wIdZmP^wSr|@uh@riA{|@`Q`KhCcG`x@ko@xD{Hvb@sLx@jFgDIiCyPwHzBwK`DfArFeGvBJ`Bj`@uJuBgNvD_ABkItEkArC|Q",
-  "d2-0": "qygkFdowv@wK`DfArFoGdDt@dAb]kJnA`GfElCAnFbBbHe@bCdEVx@`Bi@zbAfA|GtJrWhCjPN|o@`EhYnGbHzMp_@pD~RpFhl@|Bhj@sFn@b@rJk@nQ|AhKvAlG_DwRl@eSw@uGArU?lFxCvQ`JaC|A|KpChq@sF`O|Aj@I~AzFwQgB{TxH[j@dFeAuJiH|@mA}WqIkz@cCci@{Fwo@cFaXiOsd@X}A~DSO~BuGR{AeBuDyNaA{LU_k@mB}M}Kq\\g@oEl@qgAsAt@uVaB@aCrNt@?_OyEmD_DuRwHzB",
-  "d3-0": "qygkFdowv@wK`DfArFiInLkcApw@`TtdCmSfvBpZdwAz@lXwzAfpBqw@~d@sG}BzDiBn@hEyZ~fBjIf~@u@jqByDfYyXzl@aUtHyu@xs@oIvxAocAddAmCb`@`MtiBg_@vcAaMvkAy`@dUoIhf@eRnGuKjr@rGbViJlPvCb[z`@ba@qBtW_O|OPwKcMoKvEOYwEkW~MwKeToFbAwJgk@fJ{[mKvDmB}XmK|@uCaKvCsIzUg@tF{a@v]{SnJ}_@xSkA|BrVm@lN{QfGoKlq@nCvMhKbDg@rHhLy@cGpPvCqDlG`DcBwBrN{FgH}a@tKgJrElHaFpB`BrDfAeNsZwVcAgLhS{n@v]cYRgY`Mcq@j_@_dAyLkeBfBab@hdAifAjIuxAzu@ss@bU}H`QiW|I__@jCcbCgIu}@hS{uAzJ_FfD}Lvn@m_@vcAmuAlUmQ|L^{e@ggBgBi`@vRaeBqDob@tLmSb@kj@fR_[tMyh@n]eNvNj@}Jyg@wHzB",
-  "d4-0": "qygkFdowv@wK`DfArFoGjCkOwRpJjDp@wCcI}C_|BsIeEum@iJqN}EaAaCkZmImIkOGmIjCkC}MqGiBgCkPXgn@u\\eKss@nCFu`@pGj@NkM}Jw@cZeANeIKoFCtPcm@wBq@lMbC`t@pGQfAuC`pByJ~YxHdBpDhMqAvN}FrIqXva@dSph@lNlhAxbAuFzLpC}DpHhDfQnRkC`ClBlCSxM~DpTpD}AfFvCeAbHpFQzFjBzDnO_B`GhApFwHzB",
-  "d5-0": "qygkFdowv@_dBzXrv@v~E~yLcz@lqLg`XyZuin@{rB_lKl{@s}SdhHi}ApfNizNrkHwhB~~Ip_AyoEdsIcgAxwUxxC`cQ|cH_{B~|X_uZgUkoM{qB_cEzpJ_|DfsXefe@rcQuoH|oY}fBh{ZqzLv}QdxEpvHos@h}TzhN`hVxZjpX}uIdiBpaFfB~dTmlBzcZxzDp`D",
-  "d6-0": "yqqaF`h_s@mDy@mCaKyAg^eGs\\vKePxIgBfNuSTiOpLeYnAsKvUjAhIzHl@kLlDsGu@cJq^}aAqOip@iEmd@bd@aa@|Ry[cJuYdK_a@`XAtr@uVhc@ahAzTiLRyDzFcEgEGgCwR}P}XgQxA{MwBpn@eh@ca@|YyEhJkF~@eRmPsPeBkC}DkIP}aCp]iI|FzAjDxBh{@aZldByEto@kLdVzAhCcJpSMxg@cIbNwMhKmNtk@yDnEA`UcHxZrCh`@oAne@`QrTrFfOnRsBxPlIRzLzGdS~a@nYzNgDThEfAyF|C~RfE~A",
-  "d7-0": "yqqaF`h_s@uJeV_FhZsx@}Bwe@zuAo\\~@{Fva@exBi}@uo@zHaXk[~P|kGoo@`rCn}@d{E~YhrEzd@ttB|yBhrDjDps@bd@cAp^ak@lnCyzAxC`sAf_AxxDsMpm@`Dhp@zq@x_DcKb_EzOp`AxbAzhA~Ezl@~Xre@sDhb@}w@j_BtMlyAn@z|Cb}AlrA~gAxDpj@nb@~cHrvBcj@sTgIhVwoB|{AsCl~Bf^llAg^mlAfCm}B|{B_tBmzFgaBqj@ob@qiAsE_hAkv@yWwi@zBikCqMm}A|y@ebB`Cwa@uYma@qAoh@mjAcvAsQs|AlQ{rCus@ciDvHy_Bg~@asDgEaaAzCwVxg@iLbHuvAd\\yc@~xA{`@slBbU}LfOaG}IiPfDjEuMij@l]cyAo\\c{@qt@oeAiTqnAi|Cdf@m_BmVkiA}e@m}@TmoFxU}m@bBwz@|Pg[by@jP\\m`@hf@yN`YkeAly@X~EiZtJdV",
-  "d8-0": "yqqaF`h_s@mDy@mCaKyAg^mFcYcWlDkZa@mAoHwOmIiMtBoDwAaX{c@km@{h@kCiHeAqXxLwl@pLmNfa@_T`Sm^vGaEwMqZcRqz@wFkLq[gOm]aFkmA{n@ov@vFyIaAmb@s[oN_SsJtCmN{MnBvFsBlDjHdIaJuDrDlF{FjHnAM`DhMrIeESbE|@aIhIiA{HkRvHwDtQpTf`@|YdL|@pt@cGdnA`p@xh@nJ~NdJvFhLtOnt@dHxQ^pJwGpU{InNce@xWyKdOoKjj@zAf]}@fGvJRl_@x^fSdVlJvTnRsBxPlIRzLnGtRpJ~D~HbKhNbHjMoDThEfAyF|C~RfE~A",
-  "d8-1": "yqqaF`h_s@{H{LgIkx@or@jCmAoHwOmIyR\\aX{c@an@qi@sEeWrPk{@vk@y^x[od@ee@y~Ay_@qUyM_}BhKod@pw@}~@hQkg@dCec@uDex@`Hkq@}N}y@Coa@|Z}hAlNrBvLedAfZcJbQmRkDcwCsSmSnQrNhAtQvCviCgL|Maa@lNsLd}@cSmGnDrByA`PeWl_A?na@~N|y@mH`u@`Ett@cCzb@sQzg@iw@j~@kKld@bJtlBkGpQ~[xEpNvLv^j|AsR`e@co@dc@aOdy@bAr\\hJOl_@x^l^rk@vRiBxPlInH`a@~a@nYzNgDThEfAyFdJ~U",
-  "d9-0": "yqqaF`h_s@i|DszDfzAqcCouAoiFziBy~MkBeaTumBgjFulXl}IkgVsZ{|TaiNgbIlq@qlOa_Fqv]xiMqy^n{CigMpwHuoZxof@s{JthBmrZy|E}tO`|GahMniNadHh}Ays@dsSzeBbtWi}Xj~Iu}@nzM}}IzpOil@nrFtsD`eEigB{e@",
-};
+/* ============ ROUTES (one concept: legs in the timeline) ============ */
+/* ====== GOOGLE MAPS API KEY ======
+   Paste your key between the quotes and the map becomes a full Google Map:
+   all pins on Google, and tapping a route draws Google's real directions
+   (transit for Lisbon legs, driving for van legs). Free key:
+   console.cloud.google.com -> enable "Maps JavaScript API" + "Directions API",
+   restrict it to this site's domain. Without a key the site falls back to
+   the OpenStreetMap view and draws road routes from OSRM. */
+const GMAPS_KEY = "";
+
+const RB_LEGS = [
+  {d:1, pos:0,  n:"LIS Airport → Hotel", mode:"🚕 pre-booked transfer", dur:"~20 min", flg:"d", c:["airport","stayLisbon"]},
+  {d:2, pos:-1, n:"Hotel → Belém", mode:"🚋 tram 15E", dur:"~25 min", flg:"r", c:["stayLisbon","jeronimos"]},
+  {d:2, pos:2,  n:"Belém → Hotel", mode:"🚋 tram 15E", dur:"~25 min", flg:"r", c:["torre","stayLisbon"]},
+  {d:3, pos:-1, n:"Hotel → Quinta da Regaleira", mode:"🚆 train from Rossio", dur:"~55 min", flg:"r", c:["stayLisbon","regaleira"]},
+  {d:3, pos:0,  n:"Regaleira → Pena Palace", mode:"🚌 shuttle / tuk-tuk", dur:"~15 min", flg:"d", c:["regaleira","pena"]},
+  {d:3, pos:1,  n:"Pena → Hotel", mode:"🚆 train via Sintra station", dur:"~1 h 10", flg:"r", c:["pena","stayLisbon"]},
+  {d:4, pos:-1, n:"Hotel → Oceanário", mode:"🚇 metro via Alameda", dur:"~25 min", flg:"r", c:["stayLisbon","oceanario"]},
+  {d:4, pos:1,  n:"Parque das Nações → Alfama", mode:"🚇 metro", dur:"~25 min", flg:"r", c:["telecabine","alfama"]},
+  {d:5, pos:-1, n:"Hotel → Sixt van pickup", mode:"🚕 two Ubers", dur:"~10 min", flg:"d", c:["stayLisbon","sixt"]},
+  {d:5, pos:0,  n:"Sixt → Comporta → Villa", mode:"🚐 the van, A2 south", dur:"~2 h 45", flg:"d", c:["sixt","comporta","ferragudo"]},
+  {d:6, pos:-1, n:"Villa → Benagil → Marinha → Villa", mode:"🚐 the van", dur:"~40 min total", flg:"d", c:["ferragudo","benagil","marinha","ferragudo"]},
+  {d:7, pos:-1, n:"Villa → Sagres → Cabo → Piedade → Lagos → Villa", mode:"🚐 the van", dur:"~2 h 10 total", flg:"d", c:["ferragudo","sagres","cabosv","piedade","lagos","ferragudo"]},
+  {d:8, pos:0,  n:"Villa → Silves → Villa (Option A)", mode:"🚐 the van", dur:"~50 min total", flg:"d", c:["ferragudo","silves","ferragudo"]},
+  {d:8, pos:1,  n:"Villa → Zoomarine → Villa (Option B)", mode:"🚐 the van", dur:"~40 min total", flg:"d", c:["ferragudo","zoomarine","ferragudo"]},
+  {d:9, pos:-1, n:"Villa → LIS Airport", mode:"🚐 the van, van back 14:00", dur:"~2 h 45", flg:"d", c:["ferragudo","airport"]}
+];
+function legGmapsUrl(leg){
+  const pts = leg.c.map(i=>DEST[i].lat+','+DEST[i].lng);
+  const wp = pts.slice(1,-1).join('|');
+  return 'https://www.google.com/maps/dir/?api=1&origin='+pts[0]+'&destination='+pts[pts.length-1]
+    +(wp?'&waypoints='+encodeURIComponent(wp):'')
+    +'&travelmode='+(leg.flg==='r'?'transit':'driving');
+}
+function legHtml(i, leg){
+  return `<button class="rb-leg" type="button" data-leg="${i}" data-region="${DAYS[leg.d-1].region}">
+    <span class="rb-txt"><strong>${leg.n}</strong><span class="rb-mode">${leg.mode} · ${leg.dur}</span></span>
+    <span class="rb-see">route ▸ map</span>
+    ${leg.flg==='d'&&leg.mode.includes('🚐')?`<a class="rb-g" href="${legGmapsUrl(leg)}" target="_blank" rel="noopener">Google ↗</a>`:''}
+  </button>`;
+}
 function decodePolyline(str){
   const pts=[]; let i=0, lat=0, lng=0;
   while(i<str.length){
@@ -777,69 +730,146 @@ function decodePolyline(str){
   return pts;
 }
 
-/* Google link only where we actually drive (the van days) */
-function gmapsUrl(ids){
-  const pts = ids.map(i=>DEST[i].lat+','+DEST[i].lng);
-  const wp = pts.slice(1,-1).join('|');
-  return 'https://www.google.com/maps/dir/?api=1'
-    +'&origin='+pts[0]+'&destination='+pts[pts.length-1]
-    +(wp?'&waypoints='+encodeURIComponent(wp):'')+'&travelmode=driving';
+/* ============ MAP (Google when key present; OSM fallback) ============ */
+const REGION_COL = {lisbon:'#1E4E8C', algarve:'#C2702E', transfer:'#6B7280', stay:'#2E7D46'};
+const destDayNum = {};
+DAYS.forEach((day,di)=>{ day.stops.forEach(s=>{ if(!(s.d in destDayNum)) destDayNum[s.d] = di+1; }); });
+const pinText = id => String(DEST[id].pinLabel || destDayNum[id] || '');
+
+let map = null;                       /* leaflet */
+let G = null, gDirSvc = null, gDirRen = null;  /* google */
+const markers = {};
+let routeLine = null;
+let pendingLeg = null;
+
+function gPin(region, selected){
+  return {path:google.maps.SymbolPath.CIRCLE, scale:selected?15:12,
+    fillColor:REGION_COL[region], fillOpacity:1,
+    strokeColor:selected?'#1C2B3A':'#FFFFFF', strokeWeight:selected?3.5:2.5,
+    labelOrigin:new google.maps.Point(0,0)};
 }
-function routeHtml(di, ri, r, withDayBadge){
-  const day = DAYS[di];
-  const chain = r.c.map((id,i)=>{
-    const isBase = i===0 || i===r.c.length-1;
-    return (i?'<span class="rt-seg"></span>':'')
-      +`<span class="rt-stop${isBase?' base':''}"><span class="rt-dot"></span><span class="rt-name">${SHORT[id]||DEST[id].name}</span></span>`;
-  }).join('');
-  return `<button class="route" data-region="${day.region}" data-di="${di}" data-ri="${ri}" type="button"
-      aria-label="Show ${r.t} on the map">
-    <span class="rt-head">
-      ${withDayBadge?`<span class="rt-day">D${di+1}</span>`:''}
-      <span class="rt-label">Route · tap to see on map</span>
-      <span class="rt-mode">${r.mode}${r.t&&withDayBadge?' · '+r.t:(ROUTES[day.id].length>1?' · '+r.t:'')}</span>
-      <span class="rt-dur">${r.dur||''}</span>
-      ${r.g?`<a class="rt-g" href="${gmapsUrl(r.c)}" target="_blank" rel="noopener">Google ↗</a>`:''}
-    </span>
-    <span class="rt-chain">${chain}</span>
-  </button>`;
-}
-
-/* ============ MAP ============ */
-const map = L.map('map',{scrollWheelZoom:true,zoomControl:true});
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-  maxZoom:19,attribution:'&copy; OpenStreetMap contributors'
-}).addTo(map);
-
-const markers = {};       // destId -> {marker, el}
-const destDayNum = {};    // destId -> day index label
-DAYS.forEach((day,di)=>{
-  day.stops.forEach(s=>{ if(!(s.d in destDayNum)) destDayNum[s.d] = di+1; });
-});
-
-Object.entries(DEST).forEach(([id,d])=>{
-  const el = document.createElement('div');
-  el.className = `pin ${d.region}`;
-  el.innerHTML = `<span>${d.pinLabel||destDayNum[id]||''}</span>`;
-  const icon = L.divIcon({className:'',html:el.outerHTML,iconSize:[26,26],iconAnchor:[13,24]});
-  const m = L.marker([d.lat,d.lng],{icon,title:d.name,keyboard:true}).addTo(map);
-  m.on('click',()=>selectDest(id,{scrollCard:true}));
-  markers[id] = m;
-});
-
-function fitAll(){
-  const b = L.latLngBounds(Object.values(DEST).map(d=>[d.lat,d.lng]));
-  map.fitBounds(b,{padding:[36,36]});
-}
-fitAll();
-
-function setMarkerState(activeIds,selectedId){
-  Object.entries(markers).forEach(([id,m])=>{
-    const icon = m.getElement()?.querySelector('.pin');
-    if(!icon) return;
-    icon.classList.toggle('dim', activeIds && !activeIds.has(id));
-    icon.classList.toggle('selected', id===selectedId);
+window.initGMap = function(){
+  G = new google.maps.Map(document.getElementById('map'),{
+    center:{lat:38.0,lng:-8.85}, zoom:7,
+    mapTypeControl:false, streetViewControl:false, clickableIcons:false
   });
+  gDirSvc = new google.maps.DirectionsService();
+  gDirRen = new google.maps.DirectionsRenderer({suppressMarkers:true});
+  Object.entries(DEST).forEach(([id,d])=>{
+    const m = new google.maps.Marker({
+      position:{lat:d.lat,lng:d.lng}, map:G, title:d.name,
+      icon:gPin(d.region,false),
+      label:{text:pinText(id)||'·', color:'#fff', fontSize:'11px', fontWeight:'800'},
+      zIndex: d.region==='stay'?3:2
+    });
+    m.addListener('click',()=>selectDest(id,{scrollCard:true}));
+    markers[id] = {m};
+  });
+  mapFitAll();
+  if(pendingLeg!==null){ const l=pendingLeg; pendingLeg=null; mapShowLegRoute(l); }
+};
+if(GMAPS_KEY){
+  const s = document.createElement('script');
+  s.src = 'https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(GMAPS_KEY)+'&callback=initGMap';
+  s.async = true;
+  document.head.appendChild(s);
+}else{
+  map = L.map('map',{scrollWheelZoom:true,zoomControl:true});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    maxZoom:19,attribution:'&copy; OpenStreetMap contributors'
+  }).addTo(map);
+  Object.entries(DEST).forEach(([id,d])=>{
+    const el = document.createElement('div');
+    el.className = `pin ${d.region}`;
+    el.innerHTML = `<span>${pinText(id)}</span>`;
+    const icon = L.divIcon({className:'',html:el.outerHTML,iconSize:[26,26],iconAnchor:[13,24]});
+    const m = L.marker([d.lat,d.lng],{icon,title:d.name,keyboard:true}).addTo(map);
+    m.on('click',()=>selectDest(id,{scrollCard:true}));
+    markers[id] = {m};
+  });
+  mapFitAll();
+}
+
+function mapFitPts(pts){
+  if(G){ const b = new google.maps.LatLngBounds(); pts.forEach(p=>b.extend({lat:p[0],lng:p[1]})); G.fitBounds(b, 48); }
+  else if(map){
+    if(!map._loaded){ map.fitBounds(L.latLngBounds(pts),{padding:[36,36]}); }
+    else if(pts.length===1) map.flyTo(pts[0], 12, {duration:.8});
+    else map.flyToBounds(L.latLngBounds(pts),{padding:[46,46],duration:.8});
+  }
+}
+function mapFitAll(){ mapFitPts(Object.values(DEST).map(d=>[d.lat,d.lng])); }
+function mapFlyTo(lat,lng,minZoom){
+  if(G){ G.panTo({lat,lng}); if(G.getZoom()<minZoom) G.setZoom(minZoom); }
+  else if(map){ map.flyTo([lat,lng], Math.max(map.getZoom(),minZoom), {duration:.7}); }
+}
+function mapSetState(activeIds, selectedId){
+  Object.entries(markers).forEach(([id,rec])=>{
+    const dim = !!(activeIds && !activeIds.has(id));
+    const sel = id===selectedId;
+    if(G){
+      rec.m.setOpacity(dim?0.28:1);
+      rec.m.setIcon(gPin(DEST[id].region, sel));
+      rec.m.setZIndex(sel?9:(DEST[id].region==='stay'?3:2));
+    }else{
+      const icon = rec.m.getElement()?.querySelector('.pin');
+      if(!icon) return;
+      icon.classList.toggle('dim', dim);
+      icon.classList.toggle('selected', sel);
+    }
+  });
+}
+function mapClearRoute(){
+  if(routeLine){
+    if(routeLine.setMap) routeLine.setMap(null); else if(routeLine.remove) routeLine.remove();
+    routeLine = null;
+  }
+  if(gDirRen) gDirRen.setMap(null);
+}
+function mapDrawPolyline(pts,color){
+  mapClearRoute();
+  if(G){
+    routeLine = new google.maps.Polyline({path:pts.map(p=>({lat:p[0],lng:p[1]})),
+      strokeColor:color, strokeOpacity:.85, strokeWeight:5, map:G});
+  }else if(map){
+    routeLine = L.polyline(pts,{color,weight:4,lineCap:'round',opacity:.85}).addTo(map);
+  }
+}
+function mapInvalidate(){ if(map) map.invalidateSize(); }
+
+/* draw a leg: Google's real directions when the key is in; OSRM roads otherwise */
+const legGeomCache = {};
+async function mapShowLegRoute(leg){
+  if(GMAPS_KEY && !G){ pendingLeg = leg; return; }
+  mapClearRoute();
+  const pts = leg.c.map(id=>[DEST[id].lat,DEST[id].lng]);
+  if(G && gDirSvc){
+    gDirRen.setMap(G);
+    gDirSvc.route({
+      origin:{lat:pts[0][0],lng:pts[0][1]},
+      destination:{lat:pts[pts.length-1][0],lng:pts[pts.length-1][1]},
+      waypoints:pts.slice(1,-1).map(p=>({location:{lat:p[0],lng:p[1]},stopover:true})),
+      travelMode: leg.flg==='r' ? google.maps.TravelMode.TRANSIT : google.maps.TravelMode.DRIVING
+    },(res,status)=>{
+      if(status==='OK'){ gDirRen.setDirections(res); }
+      else{ gDirRen.setMap(null); mapDrawPolyline(pts,'#4285F4'); mapFitPts(pts); }
+    });
+    return;
+  }
+  const key = leg.c.join('_');
+  let g = legGeomCache[key];
+  if(g===undefined){
+    try{
+      const coords = pts.map(p=>p[1]+','+p[0]).join(';');
+      const r = await fetch('https://router.project-osrm.org/route/v1/driving/'+coords+'?overview=simplified&geometries=polyline');
+      const j = await r.json();
+      g = j.code==='Ok' ? j.routes[0].geometry : null;
+    }catch(e){ g = null; }
+    legGeomCache[key] = g;
+  }
+  const line = g ? decodePolyline(g) : pts;
+  mapDrawPolyline(line, '#4285F4');
+  mapFitPts(line);
 }
 
 /* ============ ITINERARY RENDER ============ */
@@ -1007,144 +1037,39 @@ DAYS.forEach((day,di)=>{
   sec.className='day';
   sec.id=day.id;
   sec.dataset.region=day.region;
-  const stopsHtml = day.stops.map(s=>{
+  const legsAt = p => RB_LEGS.map((l,i)=>({l,i}))
+    .filter(x=>x.l.d===di+1 && x.l.pos===p)
+    .map(x=>legHtml(x.i,x.l)).join('');
+  const stopsHtml = legsAt(-1) + day.stops.map((s,si)=>{
     const d = DEST[s.d];
     return `<button class="stop" data-dest="${s.d}" data-region="${d.region}">
       <span class="time">${s.t}</span>
       <span><span class="name">${d.name}</span><br><span class="blurb">${s.b}</span></span>
       <span class="chev">›</span>
-    </button>`;
+    </button>`+legsAt(si);
   }).join('');
-  const routesHtml = (ROUTES[day.id]||[]).map((r,ri)=>routeHtml(di,ri,r,false)).join('');
   sec.innerHTML = `
     <div class="day-head"><span class="dnum">Day ${di+1} · ${day.num}</span><h2>${day.title}</h2></div>
     <p class="day-sub">${day.sub}</p>
     <div class="stops">${stopsHtml}</div>
-    ${routesHtml}
     ${day.note?`<p class="note">${day.note}</p>`:''}`;
   itin.appendChild(sec);
 });
 
-/* all-routes panel */
-const routesPanel = document.createElement('section');
-routesPanel.className='panel';
-const RB_LEGS = [
-  {d:1, n:"LIS Airport → Hotel", mode:"🚕 pre-booked transfer", dur:"~20 min", flg:"d", c:["airport","stayLisbon"]},
-  {d:2, n:"Hotel → Belém", mode:"🚋 tram 15E", dur:"~25 min", flg:"r", c:["stayLisbon","jeronimos"]},
-  {d:2, n:"Belém → Hotel", mode:"🚋 tram 15E", dur:"~25 min", flg:"r", c:["torre","stayLisbon"]},
-  {d:3, n:"Hotel → Quinta da Regaleira", mode:"🚆 train from Rossio", dur:"~55 min", flg:"r", c:["stayLisbon","regaleira"]},
-  {d:3, n:"Regaleira → Pena Palace", mode:"🚌 shuttle / tuk-tuk", dur:"~15 min", flg:"d", c:["regaleira","pena"]},
-  {d:3, n:"Pena → Hotel", mode:"🚆 train via Sintra station", dur:"~1 h 10", flg:"r", c:["pena","stayLisbon"]},
-  {d:4, n:"Hotel → Oceanário", mode:"🚇 metro via Alameda", dur:"~25 min", flg:"r", c:["stayLisbon","oceanario"]},
-  {d:4, n:"Parque das Nações → Alfama", mode:"🚇 metro", dur:"~25 min", flg:"r", c:["telecabine","alfama"]},
-  {d:5, n:"Hotel → Sixt van pickup", mode:"🚕 two Ubers", dur:"~10 min", flg:"d", c:["stayLisbon","sixt"]},
-  {d:5, n:"Sixt → Comporta → Villa", mode:"🚐 the van, A2 south", dur:"~2 h 45", flg:"d", c:["sixt","comporta","ferragudo"]},
-  {d:6, n:"Villa → Benagil → Marinha → Villa", mode:"🚐 the van", dur:"~40 min total", flg:"d", c:["ferragudo","benagil","marinha","ferragudo"]},
-  {d:7, n:"Villa → Sagres → Cabo → Piedade → Lagos → Villa", mode:"🚐 the van", dur:"~2 h 10 total", flg:"d", c:["ferragudo","sagres","cabosv","piedade","lagos","ferragudo"]},
-  {d:8, n:"Villa → Silves → Villa (Option A)", mode:"🚐 the van", dur:"~50 min total", flg:"d", c:["ferragudo","silves","ferragudo"]},
-  {d:8, n:"Villa → Zoomarine → Villa (Option B)", mode:"🚐 the van", dur:"~40 min total", flg:"d", c:["ferragudo","zoomarine","ferragudo"]},
-  {d:9, n:"Villa → LIS Airport", mode:"🚐 the van, van back 14:00", dur:"~2 h 45", flg:"d", c:["ferragudo","airport"]}
-];
-/* ====== GOOGLE MAPS API KEY ======
-   Paste your key between the quotes to upgrade the route book to the full
-   Google Maps directions experience (interactive map + Google's own
-   step-by-step panel with bus/tram/metro lines). Get one free at
-   console.cloud.google.com → enable "Maps JavaScript API" — restrict the
-   key to this site's domain. With no key, the simple embed below is used. */
-const GMAPS_KEY = "";
-
-function embedUrl(leg){
-  const pts = leg.c.map(i=>DEST[i].lat+','+DEST[i].lng);
-  return 'https://maps.google.com/maps?saddr='+pts[0]+'&daddr='+pts.slice(1).join('+to:')
-    +'&dirflg='+leg.flg+'&output=embed&hl=en';
-}
-function legGmapsUrl(leg){
-  const pts = leg.c.map(i=>DEST[i].lat+','+DEST[i].lng);
-  const wp = pts.slice(1,-1).join('|');
-  return 'https://www.google.com/maps/dir/?api=1&origin='+pts[0]+'&destination='+pts[pts.length-1]
-    +(wp?'&waypoints='+encodeURIComponent(wp):'')
-    +'&travelmode='+(leg.flg==='r'?'transit':'driving');
-}
-routesPanel.innerHTML = `
-  <h2>The trip on Google Maps</h2>
-  <p class="sub">Every leg of the trip. Pick one — Google Maps shows the route${GMAPS_KEY?' and the step-by-step directions':''}.</p>
-  <div class="rb-grid">
-    <div class="rb-list" id="rb-list">
-      ${RB_LEGS.map((leg,i)=>`
-        <button class="rb-leg" type="button" data-leg="${i}">
-          <span class="rt-day" data-region="${DAYS[leg.d-1].region}">D${leg.d}</span>
-          <span class="rb-txt"><strong>${leg.n}</strong><span class="rb-mode">${leg.mode} · ${leg.dur}</span></span>
-        </button>`).join('')}
-    </div>
-    <div class="rb-right">
-      <div class="rb-map" id="rb-map"></div>
-      <div class="rb-steps" id="rb-steps" style="display:none"></div>
-      <a class="rb-open" id="rb-open" href="#" target="_blank" rel="noopener" style="display:none">Open this route in the Google Maps app ↗</a>
-    </div>
-  </div>`;
-itin.appendChild(routesPanel);
-const rbMap = document.getElementById('rb-map');
-const rbSteps = document.getElementById('rb-steps');
-const rbOpen = document.getElementById('rb-open');
-
-/* Full Google Maps mode (needs GMAPS_KEY): interactive map + Google's own
-   directions panel — the same step list, transit lines included. */
-let gMap=null, gDirSvc=null, gDirRen=null;
-window.initRB = function(){
-  gMap = new google.maps.Map(rbMap,{center:{lat:38.0,lng:-8.9},zoom:7,mapTypeControl:false,streetViewControl:false});
-  gDirSvc = new google.maps.DirectionsService();
-  gDirRen = new google.maps.DirectionsRenderer({map:gMap,panel:rbSteps});
-  const active = document.querySelector('.rb-leg.active');
-  if(active) showLeg(+active.dataset.leg);
-};
-if(GMAPS_KEY){
-  const s = document.createElement('script');
-  s.src = 'https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(GMAPS_KEY)+'&callback=initRB';
-  s.async = true;
-  document.head.appendChild(s);
-}
-
-function showLeg(i){
-  const leg = RB_LEGS[i];
-  document.querySelectorAll('.rb-leg').forEach((b,k)=>b.classList.toggle('active', k===i));
-  rbOpen.href = legGmapsUrl(leg);
-  rbOpen.style.display='block';
-  if(GMAPS_KEY && gDirSvc){
-    const pts = leg.c.map(id=>({lat:DEST[id].lat,lng:DEST[id].lng}));
-    rbSteps.style.display='block';
-    gDirSvc.route({
-      origin:pts[0], destination:pts[pts.length-1],
-      waypoints:pts.slice(1,-1).map(p=>({location:p,stopover:true})),
-      travelMode: leg.flg==='r' ? google.maps.TravelMode.TRANSIT : google.maps.TravelMode.DRIVING
-    },(res,status)=>{
-      if(status==='OK'){ gDirRen.setDirections(res); }
-      else{ rbSteps.textContent = "Google couldn't route this leg here — the button below opens it in the app."; }
-    });
-  }else{
-    rbMap.innerHTML = `<iframe src="${embedUrl(leg)}" loading="lazy" title="Route: ${leg.n}" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>`;
-  }
-}
-document.getElementById('rb-list').addEventListener('click',e=>{
+/* leg buttons in the timeline -> draw the route on the main map */
+document.addEventListener('click', e=>{
+  if(e.target.closest('.rb-g')) return;
   const btn = e.target.closest('.rb-leg');
   if(!btn) return;
-  showLeg(+btn.dataset.leg);
-  if(window.matchMedia('(max-width:820px)').matches) rbMap.scrollIntoView({behavior:'smooth',block:'center'});
-});
-showLeg(0); /* the map is live from the start */
-
-/* route blocks: clicking shows the route on the page's own map */
-document.addEventListener('click',e=>{
-  if(e.target.closest('.rt-g')) return; /* the Google link acts on its own */
-  const btn = e.target.closest('.route');
-  if(!btn) return;
-  const di = +btn.dataset.di, ri = +btn.dataset.ri;
+  document.querySelectorAll('.rb-leg').forEach(b=>b.classList.toggle('active', b===btn));
   if(window.matchMedia('(max-width:960px)').matches && !document.body.classList.contains('map-open')){
     document.body.classList.add('map-open');
-    mapFab.setAttribute('aria-pressed','true');
-    mapFabLabel.textContent = 'Close map';
-    map.invalidateSize();
+    const fab = document.getElementById('map-fab');
+    fab.setAttribute('aria-pressed','true');
+    document.getElementById('map-fab-label').textContent = 'Close map';
+    mapInvalidate();
   }
-  requestAnimationFrame(()=>activateDay(di, true, ri));
+  requestAnimationFrame(()=>mapShowLegRoute(RB_LEGS[+btn.dataset.leg]));
 });
 
 /* practical footer panel */
@@ -1165,37 +1090,18 @@ itin.appendChild(prac);
 let currentDay = null;
 let selectedDest = null;
 
-let routeLine = null;
-function drawRoute(di, ri){
-  if(routeLine){ routeLine.remove(); routeLine=null; }
-  if(di===null) return;
-  const day = DAYS[di];
-  const r = ROUTES[day.id];
-  if(!r || !r.length) return;
-  const key = day.id+'-'+(ri||0);
-  const geom = ROUTE_GEOM[key];
-  const pts = geom ? decodePolyline(geom) : r[ri||0].c.map(id=>[DEST[id].lat,DEST[id].lng]);
-  const col = day.region==='lisbon' ? '#1E4E8C' : day.region==='algarve' ? '#C2702E' : '#6B7280';
-  routeLine = L.polyline(pts,{color:col,weight:4,lineCap:'round',opacity:.8}).addTo(map);
-}
-
-function activateDay(di, flyTo, ri){
+function activateDay(di, flyTo){
   currentDay = di;
   document.querySelectorAll('.daytab').forEach((t,i)=>t.classList.toggle('active', i===(di===null?0:di+1)));
-  drawRoute(di, ri);
+  mapClearRoute();
   if(di===null){
-    setMarkerState(null, selectedDest);
-    fitAll();
+    mapSetState(null, selectedDest);
+    mapFitAll();
   }else{
     const day = DAYS[di];
     const ids = new Set(day.stops.map(s=>s.d));
-    setMarkerState(ids, selectedDest);
-    if(flyTo){
-      const pts = day.stops.map(s=>[DEST[s.d].lat,DEST[s.d].lng]);
-      if(ROUTES[day.id]) ROUTES[day.id][ri||0].c.forEach(id=>pts.push([DEST[id].lat,DEST[id].lng]));
-      if(pts.length===1) map.flyTo(pts[0], 12, {duration:.8});
-      else map.flyToBounds(L.latLngBounds(pts),{padding:[46,46],duration:.8});
-    }
+    mapSetState(ids, selectedDest);
+    if(flyTo) mapFitPts(day.stops.map(s=>[DEST[s.d].lat,DEST[s.d].lng]));
     document.getElementById(day.id).scrollIntoView({behavior:'smooth',block:'start'});
   }
 }
@@ -1335,8 +1241,8 @@ async function selectDest(id,{scrollCard=false}={}){
     if(card) card.scrollIntoView({behavior:'smooth',block:'center'});
   }
   /* map */
-  setMarkerState(currentDay===null?null:new Set(DAYS[currentDay].stops.map(s=>s.d)), id);
-  map.flyTo([d.lat,d.lng], Math.max(map.getZoom(),12), {duration:.7});
+  mapSetState(currentDay===null?null:new Set(DAYS[currentDay].stops.map(s=>s.d)), id);
+  mapFlyTo(d.lat, d.lng, 12);
   /* sheet content */
   document.getElementById('sheet-region').textContent = d.region==='lisbon'?'Lisbon & Sintra':d.region==='algarve'?'Algarve':d.region==='stay'?'Where we sleep':'Transfer';
   document.getElementById('sheet-region').className='region-tag '+d.region;
@@ -1367,7 +1273,7 @@ function closeSheet(){
   sheet.classList.remove('open');
   selectedDest=null;
   document.querySelectorAll('.stop').forEach(c=>c.classList.remove('active'));
-  setMarkerState(currentDay===null?null:new Set(DAYS[currentDay].stops.map(s=>s.d)), null);
+  mapSetState(currentDay===null?null:new Set(DAYS[currentDay].stops.map(s=>s.d)), null);
 }
 document.getElementById('sheet-close').addEventListener('click',closeSheet);
 document.addEventListener('keydown',e=>{
@@ -1389,7 +1295,7 @@ mapFab.addEventListener('click',()=>{
   const open = document.body.classList.toggle('map-open');
   mapFab.setAttribute('aria-pressed', open);
   mapFabLabel.textContent = open ? 'Close map' : 'Map';
-  if(open) requestAnimationFrame(()=>map.invalidateSize());
+  if(open) requestAnimationFrame(()=>mapInvalidate());
 });
 
 /* ============ MOBILE: swipe down to close the sheet ============ */
