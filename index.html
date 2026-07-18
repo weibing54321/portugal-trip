@@ -857,7 +857,8 @@ async function loadImages(id){
   const d = DEST[id];
   if(d.photos) return d.photos; /* stays: curated local photos with captions */
   if(imgCache[id]) return imgCache[id];
-  const urls = [], seen = new Set();
+  /* 1) collect candidate file titles from the article(s) */
+  const titles = [], seen = new Set();
   for(const title of d.wiki){
     try{
       const r = await fetch('https://en.wikipedia.org/api/rest_v1/page/media-list/'+encodeURIComponent(title));
@@ -866,20 +867,47 @@ async function loadImages(id){
       for(const it of (j.items||[])){
         if(it.type!=='image') continue;
         if(IMG_SKIP.test(it.title||'')) continue;
-        const src = it.srcset && it.srcset[0] && it.srcset[0].src;
-        if(!src || seen.has(it.title)) continue;
+        if(seen.has(it.title)) continue;
         seen.add(it.title);
-        urls.push(('//'===src.slice(0,2)?'https:':'')+src);
-        if(urls.length>=MAX_PHOTOS) break;
+        titles.push(it.title);
+        if(titles.length>=MAX_PHOTOS*2) break; /* headroom: some get dropped below */
       }
     }catch(e){/* try next title */}
-    if(urls.length>=MAX_PHOTOS) break;
+    if(titles.length>=MAX_PHOTOS*2) break;
+  }
+  /* 2) resolve real sizes + a correctly scaled render; drop small originals
+        (tiny thumbs stretched over a retina screen are what pixelation is made of) */
+  const urls = [];
+  if(titles.length){
+    try{
+      const api = 'https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*'
+        +'&prop=imageinfo&iiprop=url%7Csize&iiurlwidth=1280&titles='
+        +encodeURIComponent(titles.join('|'));
+      const r = await fetch(api);
+      if(r.ok){
+        const j = await r.json();
+        const byTitle = {};
+        Object.values((j.query&&j.query.pages)||{}).forEach(p=>{
+          const ii = p.imageinfo && p.imageinfo[0];
+          if(ii) byTitle[p.title] = ii;
+        });
+        const norm = {};
+        (((j.query||{}).normalized)||[]).forEach(n=>{ norm[n.from]=n.to; });
+        for(const t of titles){
+          const ii = byTitle[norm[t]||t];
+          if(!ii) continue;
+          const ratio = ii.width/ii.height;
+          if(ii.width<640 || ii.height<480) continue;   /* too small to show */
+          if(ratio<0.55 || ratio>2.6) continue;         /* extreme crops look bad */
+          urls.push(ii.thumburl||ii.url);
+          if(urls.length>=MAX_PHOTOS) break;
+        }
+      }
+    }catch(e){/* fall through with whatever we have */}
   }
   imgCache[id]=urls;
   return urls;
 }
-/* media-list thumbs come back small (~500px); ask Wikimedia for a wider render */
-function upscale(u,w){ return u.replace(/\/(\d+)px-/, '/'+w+'px-'); }
 
 const sheet = document.getElementById('sheet');
 const backdrop = document.getElementById('backdrop');
@@ -924,9 +952,7 @@ function renderCarousel(urls,name,credit){
     const img = document.createElement('img');
     img.loading = i===0 ? 'eager' : 'lazy';
     img.alt = item.cap || (name+' — photo '+(i+1)+' of '+urls.length);
-    const big = upscale(item.src,1000);
-    img.src = big;
-    if(big!==item.src) img.onerror = ()=>{ if(!img.dataset.retried){ img.dataset.retried='1'; img.src=item.src; } };
+    img.src = item.src;
     slide.appendChild(img);
     if(item.cap){
       const cap = document.createElement('div');
