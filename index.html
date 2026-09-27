@@ -611,11 +611,11 @@ const DAYS = [
    sub:"Cool-morning option: tuk-tuk viewpoints loop. Tram 15E out at 13:15, tarts as a late lunch, cloister at 15:30 (booked), then the Torre walk in golden light.",
    stops:[
      {t:"10:00",d:"alfama",b:"Optional: 2 tuk-tuks up the hills — Santa Luzia → Portas do Sol → Graça → Senhora do Monte · agree price first (€70–90 per tuk-tuk, ~1 hr)"},
-     {t:"14:00",d:"pasteis",b:"Tarts as late lunch — sit-down rooms at the back · order everything at once, ask for the bill early"},
-     {t:"15:30",d:"jeronimos",b:"Timed cloister entry — 15:30 sharp · at the ticket-holder door (west end) by 15:25"},
-     {t:"16:30",d:"torre",b:"Golden-hour riverside walk — Jardim playground → Padrão → the fortress from outside"},
+     {t:"15:30",d:"jeronimos",b:"Timed cloister entry — 15:30 sharp · at the ticket-holder door (west end) by 15:25 · coolest stone in Belém"},
+     {t:"16:45",d:"pasteis",b:"Tarts as the after-cloister reward — sit-down rooms at the back · open till 22:00"},
+     {t:"17:45",d:"torre",b:"Golden-hour riverside walk — Jardim playground → Padrão → the fortress from outside"},
    ],
-   note:"Buy navegante cards first — Rossio metro machines, 8 cards + €15 zapping each. Lower cloister first while it's busiest, upper gallery last for the light. Tram back ~18:00, home ~18:45."},
+   note:"Cards loaded (stored value = zapping). Real lunch in Baixa first, then out the door by 14:20 — tram 15E from Figueira or bus 728 from Terreiro do Paço, both land at the monastery. Home ~19:00."},
   {id:"d3",num:"Mon 28",title:"Sintra — by train, not by car",region:"lisbon",
    sub:"Two ways in: train from Rossio (~40 min) plus a 15-min walk, or two Ubers door-to-door (~45 min). Up the hill to Pena, tuk-tuks beat the 434 bus queue. Don't drive — cars can't park at Pena. Bring layers — Sintra runs its own cooler, mistier microclimate.",
    stops:[
@@ -682,7 +682,7 @@ const GMAPS_KEY = "AIzaSyBKJXmKcyUxdPbfoAIAt8DdrbaCXuAzWQ4";
 
 const RB_LEGS = [
   {d:1, pos:0,  n:"LIS Airport → Hotel", mode:"🚕 Welcome Pickups — booked, pickup 11:40", dur:"~20 min", flg:"d", c:["airport","stayLisbon"]},
-  {d:2, pos:0, n:"Hotel → Belém", mode:"🚋 tram 15E from Pç. Figueira, 13:15", dur:"~25 min", flg:"r", c:["stayLisbon","pasteis"]},
+  {d:2, pos:0, n:"Hotel → Belém", mode:"🚋 tram 15E from Pç. Figueira (or bus 728), out by 14:20", dur:"~30 min", flg:"r", c:["stayLisbon","jeronimos"]},
   {d:2, pos:3,  n:"Belém → Hotel", mode:"🚋 tram 15E, ~18:00", dur:"~25 min", flg:"r", c:["torre","stayLisbon"]},
   {d:3, pos:-1, n:"Hotel → Quinta da Regaleira (by train)", mode:"🚆 train from Rossio + 15-min walk", dur:"~1 h", flg:"r", c:["stayLisbon","regaleira"]},
   {d:3, pos:-1, n:"Hotel → Quinta da Regaleira (by Uber)", mode:"🚕 two Ubers, door to door", dur:"~45 min", price:"≈€60–80 for both cars", flg:"d", c:["stayLisbon","regaleira"]},
