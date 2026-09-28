@@ -623,14 +623,13 @@ const DAYS = [
      {t:"15:00",d:"pena",b:"Palace entry 15:00 sharp · park gate by 14:15 · shuttle bought"},
    ],
    note:"<strong>The chain that matters:</strong> lunch wraps 13:45 → tuk-tuks 14:00 → park gate 14:15 → shuttle → palace door at 15:00 (late = no entry, no refund). <strong>Escape hatch:</strong> if the 4-year-old melts after Regaleira, go home — Regaleira alone justifies the day, and Pena tickets reschedule free within a year."},
-  {id:"d4",num:"Tue 29",title:"Aquarium morning, Alfama evening",region:"lisbon",
-   sub:"Metro red line to Oriente. Naps in the middle. Skip riding tram 28.",
+  {id:"d4",num:"Tue 29",title:"Recovery day, then Alfama gold",region:"lisbon",
+   sub:"Sleep in. No tickets, no trains, no deadlines — the first since landing. The day starts when everyone's ready and peaks at golden hour.",
    stops:[
-     {t:"10:00",d:"oceanario",b:"At opening · the giant central tank · 2–2.5 hrs"},
-     {t:"14:00",d:"telecabine",b:"8 glass-cabin minutes along the river"},
-     {t:"17:00",d:"alfama",b:"Old-town wander when the crowds thin"},
+     {t:"~11:00",d:"praca",b:"Slow morning — late breakfast, riverfront · arrange the tuk-tuks at the Comércio cluster while passing (kids 4 & 7 OK'd out loud, total agreed: €150–180 for two)"},
+     {t:"16:45",d:"alfama",b:"Tuk-tuk viewpoints hour — Sé drive-by → Santa Luzia → Portas do Sol → Graça → Senhora do Monte (the keeper) · drop-off at the hotel ~18:00"},
    ],
-   note:"Swap-in if needed: <strong>Pilar 7</strong> — the glass floor out on the 25 de Abril bridge deck."},
+   note:"Home by 18:00, well inside the 18:30 cutoff. Enclosed-cabin tuk-tuks, kids mid-bench between adults, cash in tens and twenties, light layer for the summit breeze."},
   {id:"d5",num:"Wed 30",title:"South — pick up the van, drive to the Algarve",region:"transfer",
    sub:"Two Ubers to Sixt Estefânia for the 10:00 pickup, swing back to the hotel for the luggage, then the A2 + A22 to Lagos (~3 h). Ask at the desk about the Via Verde toll transponder.",
    stops:[
@@ -689,9 +688,8 @@ const RB_LEGS = [
   {d:3, pos:0,  n:"Regaleira → Pena Palace", mode:"🛺 two tuk-tuks up the hill", dur:"~15 min", price:"≈€5–10 per person", flg:"w", lock:1, c:["regaleira","pena"]},
   {d:3, pos:1,  n:"Pena → Hotel (by train)", mode:"🚆 tuk-tuk to the station + train", dur:"~1 h 10", flg:"r", c:["pena","stayLisbon"]},
   {d:3, pos:1,  n:"Pena → Hotel (by Uber)", mode:"🚕 two Ubers from the gate", dur:"~45 min", price:"≈€60–80 for both cars", flg:"d", c:["pena","stayLisbon"]},
-  {d:4, pos:-1, n:"Hotel → Oceanário", mode:"🚇 metro via Alameda", dur:"~25 min", flg:"r", c:["stayLisbon","oceanario"]},
-  {d:4, pos:1,  n:"Parque das Nações → Alfama", mode:"🚇 metro", dur:"~25 min", flg:"r", c:["telecabine","alfama"]},
-  {d:4, pos:2,  n:"Alfama → Hotel", mode:"🚶 downhill walk", dur:"~12 min", flg:"w", c:["alfama","stayLisbon"]},
+  {d:4, pos:0, n:"Hotel → tuk-tuk pickup", mode:"🚶 walk to Pç. Comércio, 16:40", dur:"~6 min", flg:"w", c:["stayLisbon","alfama"]},
+  {d:4, pos:1,  n:"Viewpoints → Hotel", mode:"🛺 tuk-tuk drop-off at the door", dur:"~10 min", flg:"w", lock:1, c:["alfama","stayLisbon"]},
   {d:5, pos:-1, n:"Hotel → Sixt van pickup", mode:"🚕 two Ubers", dur:"~10 min", price:"≈€12–16 for both", flg:"d", c:["stayLisbon","sixt"]},
   {d:5, pos:0,  n:"Sixt → Comporta → Villa", mode:"🚐 the van, A2 + A22 to Lagos", dur:"~3 h", flg:"d", c:["sixt","comporta","stayLimoeiro"]},
   {d:6, pos:-1, n:"Villa → Carvoeiro (boat base)", mode:"🚐 the van — leave by 08:50", dur:"~35 min", flg:"d", c:["stayLimoeiro","carvoeiro"]},
@@ -1018,7 +1016,7 @@ panel.innerHTML = `
     <li class="done"><span class="n">✓</span><div><strong>Van booked: Sixt Mercedes V-Class 8-seat</strong> — <span class="why">Sept 30 10:00 downtown → Oct 4 14:00 airport drop, €969.63 at pickup.</span></div></li>
     <li class="done"><span class="n">✓</span><div><strong>Airport transfer booked — Welcome Pickups</strong> — <span class="why">Sept 26, pickup 11:40, TP 254 tracked, driver in arrivals with a name sign — both child seats confirmed on the order.</span></div></li>
     <li class="done"><span class="n">✓</span><div><strong>Jerónimos booked — Sun 27, 15:30</strong> — <span class="why">timed cloister entry; church is free, separate line.</span></div></li>
-    <li class="hot"><span class="n">1</span><div><strong>Oceanário — Tue 29, 10:00</strong> — <span class="why">the last unbought ticket: oceanario.pt.</span></div></li>
+    <li class="done"><span class="n">—</span><div><strong>Oceanário — skipped by choice</strong> — <span class="why">Tuesday became the recovery day; nothing was bought, nothing lost. Every ticket on this trip is now in hand.</span></div></li>
     <li class="done"><span class="n">✓</span><div><strong>Pena palace 15:00 + shuttle, Mon Sept 28</strong> — <span class="why">8× Essential Visit booked. Palace-door time is strict: park gate by 14:15.</span></div></li>
     <li class="done"><span class="n">✓</span><div><strong>Quinta da Regaleira, Mon Sept 28</strong> — <span class="why">8 tickets booked — verify the slot time on the ticket PDF (~10:00 assumed).</span></div></li>
     <li class="done"><span class="n">✓</span><div><strong>Benagil boat: private tour booked</strong> — <span class="why">Carvoeiro Caves, Thu Oct 1, 10:00–11:30, whole boat for the 8 of us.</span></div></li>
